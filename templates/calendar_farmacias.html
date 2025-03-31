@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario</title>
+    <link rel="stylesheet" href="{% static 'css/calendar.css' %}">
+    <link rel="shortcut icon" href="/static/images/escudo-chubut.png" />
+    <script defer src="{% static 'js/calendar.js' %}"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <div class="calendar-layout">
+        <!-- Calendario -->
+        <div class="calendar-section">
+            <div class="calendar-container">
+                <header>
+                    <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
+                    <h1 id="current-month">Enero 2025</h1>
+                    <button id="next-month"><i class="fas fa-chevron-right"></i></button>
+                </header>
+                <div class="weekdays">
+                    <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    {% for fecha in dias_del_mes %}
+                        <div class="day" data-date="{{ fecha }}">
+                            {{ fecha|slice:"-2:" }} <!-- Muestra solo el día numérico -->
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                
+                
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

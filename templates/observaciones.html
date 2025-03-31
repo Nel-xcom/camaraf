@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Observaciones</title>
+    <link rel="shortcut icon" href="/static/images/escudo-chubut.png" />
+    <link rel="stylesheet" href="{% static 'css/observaciones.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <div class="container">
+        
+        <!-- Barra de navegación
+        <div class="nav-tabs">
+            <button class="tab-btn active" data-tab="comentarios">
+                <i class="fas fa-comment-alt"></i> Comentarios
+            </button>
+            <button class="tab-btn" data-tab="debitos">
+                <i class="fas fa-money-bill"></i> Débitos
+            </button>
+            <button class="tab-btn" data-tab="presentaciones">
+                <i class="fas fa-folder-open"></i> Presentaciones
+            </button>
+        </div>
+
+        -->
+
+        <!-- Campo de búsqueda -->
+        <form method="GET" action="{% url 'observaciones' %}" class="search-bar">
+            <input type="text" name="q" placeholder="Buscar presentación..." class="search-input" value="{{ request.GET.q }}">
+            <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+        </form>
+
+        <!-- Tabla de observaciones -->
+        <table class="observaciones-table">
+            <thead>
+                <tr>
+                    <th>Grupo</th>
+                    <th>Usuario</th>
+                    <th>Número de Presentación</th>
+                    <th>Periodo</th>
+                    <th>Obra Social</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for presentacion in presentaciones %}
+                <tr class="clickable-row" data-id="{{ presentacion.id }}">
+                    <td>{{ presentacion.farmacia }}</td>
+                    <td>{{ usuario_asociado.username }}</td>
+                    <td>{{ presentacion.numero_presentacion }}</td>
+                    <td>{{ presentacion.periodo }}</td>
+                    <td>{{ presentacion.obra_social }}</td>
+                    <td class="estado {{ presentacion.estado|lower }}">
+                        <i class="fas fa-circle icon-estado"></i> {{ presentacion.estado }}
+                    </td>
+                    <td>
+                        <button class="delete-btn" data-id="{{ presentacion.id }}" title="Eliminar presentación">
+                            <i class="fas fa-trash-alt" style="color: red; cursor: pointer;"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">No hay presentaciones cargadas.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- Modal para detalles -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Detalles de la Presentación</h2>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/observaciones.js' %}"></script>
+</body>
+</html>

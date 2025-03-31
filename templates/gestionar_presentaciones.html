@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Presentaciones</title>
+    <link rel="shortcut icon" href="/static/images/escudo-chubut.png" />
+    <link rel="stylesheet" href="/static/css/gestionar_presentaciones.css">
+</head>
+<body>
+    {% include "header.html" %}
+
+    <div class="container">
+        {% include 'timeline.html' with step=1 %}
+        <h1>Seleccionar Obra Social</h1>
+        <div class="cards">
+            {% for key, value in obras_sociales %}
+            <div class="card">
+                <h2>{{ value }}</h2>
+                <a href="{% url 'cargar_datos' key %}" class="load-button">Cargar Presentación</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

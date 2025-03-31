@@ -1,0 +1,390 @@
+:root {
+    --primary-color: #2ECC71; /* Verde tipo neon */
+    --secondary-color: #F8F9FA; /* Blanco suave */
+    --neutral-gray: #E5E5E5; /* Gris claro */
+    --font-color: #333333; /* Gris oscuro para texto */
+    --error-color: #FF6B6B; /* Rojo suave para errores */
+    --success-color: #4CAF50; /* Verde para éxito */
+    --font-family: 'Arial', sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--secondary-color);
+    color: var(--font-color);
+    margin: 0;
+    padding: 0;
+}
+
+.calendar-context {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.calendar-tit {
+    display: flex;
+    margin: 0 0 10px 0;
+}
+
+.calendar-tit > h1 {
+    margin-left: 25px;
+    color: var(--primary-color);
+    font-size: 27px;
+}
+
+.calendar-container {
+    width: 100%;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+header > h1{
+    color: var(--secondary-color);
+}
+
+button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--neutral-gray);
+    padding: 10px 0;
+    font-weight: bold;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.calendar-day {
+    background: white;
+    padding: 20px;
+    text-align: center;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.calendar-day:hover {
+    background: var(--neutral-gray);
+    transform: scale(1.05);
+}
+
+.calendar-day.today {
+    background: var(--primary-color);
+    color: white;
+    font-weight: bold;
+}
+
+.calendar-layout {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    padding: 30px 50px;
+}
+
+.calendar-section {
+    width: 50%;
+    margin-left: 70px;
+}
+
+.presentations-section {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 40%;
+    text-align: center;
+}
+
+.presentations-section h2 {
+    font-size: 1.6rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+#presentation-list {
+    list-style: none;
+    padding: 0;
+}
+
+.presentation-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--neutral-gray);
+    padding: 14px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    width: 100%;
+    transition: background 0.3s ease;
+}
+
+.presentation-item:hover {
+    background: var(--secondary-color);
+}
+
+.presentation-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-grow: 1;
+}
+
+.presentation-info i {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+.presentation-date,
+.presentation-social,
+.presentation-quincena {
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--error-color);
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+.delete-btn:hover {
+    color: #ff1212;
+}
+
+@keyframes slide-left {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slide-right {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 1s infinite;
+    font-weight: 600;
+}
+
+/* 🔹 MODAL - Mejoras en el diseño y armonización */
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    display: none;
+    z-index: 1000;
+    width: 950px;
+    max-width: 95%;
+}
+
+/* Activa el modal */
+.modal.active {
+    display: block;
+}
+
+/* Fondo del modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    display: none;
+    z-index: 999;
+}
+
+.modal-overlay.active {
+    display: block;
+}
+
+/* 🔹 MODAL - Encabezado */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--neutral-gray);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.modal-header h2 {
+    font-size: 1.5rem;
+    color: var(--primary-color); /* ✅ Verde principal */
+    margin: 0;
+}
+
+.butt-clo{
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-content: center;
+}
+
+/* ❌ Botón de cerrar modal */
+.modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--error-color);
+    font-size: 32px;
+    font-weight: 700;
+    transition: color 0.3s ease;
+}
+
+.modal-close:hover {
+    color: darkred;
+}
+
+/* 🔹 Contenedor de los elementos del modal */
+.modal-vec-for {
+    display: flex;
+    justify-content: space-around;
+    align-items: center; /* ✅ Centramos verticalmente */
+    gap: 15px;
+}
+
+/* 🔹 Estilización del formulario */
+.modal-vec-for form {
+    width: 40%;
+    text-align: center; /* ✅ Centrar elementos */
+}
+
+.modal-vec-for form h2{
+    color: var(--primary-color);
+    font-size: 32px;
+    padding-bottom: 80px;
+}
+
+.modal-vec-for label {
+    font-weight: bold;
+    color: var(--primary-color); /* ✅ Verde principal */
+    display: block;
+    margin-bottom: 5px;
+}
+
+.modal-vec-for input,
+.modal-vec-for select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--neutral-gray);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+    background-color: white;
+    color: var(--font-color); /* ✅ Gris oscuro */
+}
+
+.modal-vec-for input:focus,
+.modal-vec-for select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 5px var(--primary-color);
+}
+
+/* 🔹 Botón Guardar */
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.btn-save {
+    background: var(--primary-color);
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s;
+    width: 100%;
+    font-weight: bold;
+}
+
+.btn-save:hover {
+    background: #28A65D;
+}
+
+/* 🔹 Contenedor del vector */
+.vector-img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+    width: 50%;
+}
+
+/* 🔹 Imagen del vector */
+.vector-img img {
+    width: 500px; /* ✅ Ajuste proporcional */
+    height: auto;
+    max-width: 100%;
+    opacity: 0.9;
+}
+

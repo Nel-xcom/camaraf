@@ -1,0 +1,131 @@
+/* register_farmacia.css */
+:root {
+    --primary-color: #2ECC71; /* Verde tipo neon */
+    --secondary-color: #F8F9FA; /* Blanco suave */
+    --neutral-gray: #E5E5E5; /* Gris claro */
+    --font-color: #333333; /* Gris oscuro para texto */
+    --error-color: #FF6B6B; /* Rojo suave para errores */
+    --success-color: #4CAF50; /* Verde para éxito */
+    --font-family: 'Arial', sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--secondary-color);
+    color: var(--font-color);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 40%;
+    margin: auto;
+    padding: 30px;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 50px;
+    border: 0.3px solid var(--primary-color);
+    text-align: center;
+}
+
+.logo img {
+    width: 100px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+}
+
+p {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: start;
+}
+
+label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: bold;
+    color: var(--font-color);
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid var(--neutral-gray);
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 5px var(--primary-color);
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #28A65D; /* Oscurecimiento del verde */
+}
+
+button:active {
+    background-color: #1D7A46;
+}
+
+.message {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    text-align: left;
+}
+
+.message-error {
+    background-color: var(--error-color);
+    color: white;
+    border: 1px solid darkred;
+}
+
+.message-success {
+    background-color: var(--success-color);
+    color: white;
+    border: 1px solid green;
+}
+
+.helptext{
+    color: var(--primary-color);
+    border: .3px solid var(--primary-color);
+    border-radius: 15px;
+    padding: 15px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        width: 90%;
+        margin-top: 30px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+}

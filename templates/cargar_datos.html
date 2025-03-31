@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargar Datos - {{ obra_social }}</title>
+    <link rel="stylesheet" href="/static/css/cargar_datos.css">
+    <link rel="shortcut icon" href="/static/images/escudo-chubut.png" />
+</head>
+<body>
+    {%include 'header.html'%}
+
+    <div class="container">
+        {% include 'timeline.html' with step=2 %}
+        <h1>Cargar Presentación de {{ obra_social }}</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.as_p }}
+            </div>
+            <div class="form-buttons">
+                <button type="submit" class="btn btn-success">Guardar</button>
+                <a href="{% url 'gestionar_presentaciones' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,110 @@
+:root {
+    --primary-color: #2ECC71; /* Verde tipo neon */
+    --secondary-color: #F8F9FA; /* Blanco suave */
+    --neutral-gray: #E5E5E5; /* Gris claro */
+    --font-color: #333333; /* Gris oscuro para texto */
+    --error-color: #FF6B6B; /* Rojo suave para errores */
+    --success-color: #4CAF50; /* Verde para éxito */
+    --font-family: 'Arial', sans-serif;
+}
+
+.container {
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: var(--font-family);
+    color: var(--font-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+}
+
+.grid-container {
+    width: 80%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Solo 3 cards por línea */
+    gap: 20px;
+    justify-content: center;
+}
+
+@media (max-width: 992px) {
+    .grid-container {
+        grid-template-columns: repeat(2, 1fr); /* 2 cards por línea en tablets */
+    }
+}
+
+@media (max-width: 768px) {
+    .grid-container {
+        grid-template-columns: 1fr; /* 1 card por línea en móviles */
+    }
+}
+
+.card {
+    border: 2.5px dotted var(--primary-color);
+    width: 450px;
+    border-radius: 10px;
+    padding: 20px;
+    background: var(--secondary-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card h2 {
+    font-size: 1.8em;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.card > p{
+    border-bottom: .2px solid var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.card > p > b{
+    color: var(--primary-color);
+}
+
+.card .periodo {
+    font-size: 1.2em;
+    color: var(--font-color);
+    margin-bottom: 10px;
+}
+
+.summary p {
+    margin: 5px 0;
+    font-size: 1em;
+    color: var(--font-color);
+    border-bottom: .2px solid var(--neutral-gray);
+    margin-bottom: 4px;
+}
+
+.summary > p > b{
+    color: var(--primary-color);
+}
+
+.summary p span {
+    font-weight: bold;
+    color: var(--font-color);
+}
+
+.summary .neto span {
+    color: var(--success-color);
+}
+
+canvas {
+    width: 100% !important;
+    height: 200px !important;
+    margin-top: 15px;
+}

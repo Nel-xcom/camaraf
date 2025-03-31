@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación Exitosa</title>
+    <link rel="stylesheet" href="/static/css/timeline.css">
+    <link rel="shortcut icon" href="/static/images/escudo-chubut.png" />
+    <link rel="stylesheet" href="/static/css/presentacion_exitosa.css">
+</head>
+<body>
+    {% include "header.html" %}
+
+    <div class="container">
+        <!-- Timeline -->
+        {% include "timeline.html" with step=3 %}
+        
+        <!-- Icono de check -->
+        <div class="success-check">
+            <img src="{% static 'images/verificacion-verde.png' %}" alt="Éxito">
+        </div>
+
+        <!-- Información de la presentación -->
+        <div class="presentation-info">
+            <h2>Presentación Enviada</h2>
+            <p><strong>Número de Presentación:</strong> {{ carga_datos.numero_presentacion }}</p>
+            <p><strong>Periodo:</strong> {{ carga_datos.periodo }}</p>
+        </div>
+    </div>
+</body>
+</html>

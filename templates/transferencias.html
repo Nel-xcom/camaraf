@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen de Transferencias</title>
+    <link rel="stylesheet" href="{% static 'css/transferencias.css' %}">
+    <link rel="shortcut icon" href="/static/images/escudo-chubut.png" />
+    <script defer src="{% static 'js/transferencias.js' %}"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    {% include 'header.html' %}
+    <div class="container">
+        <div class="content-wrapper">
+            <h2>Resumen de Transferencias</h2>
+            
+            {% for obra_social, transferencias in transferencias_por_obra.items %}
+            <h3>Liquidación {{ obra_social }}</h3>
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>Grupo de Farmacias</th>
+                        <th>Fecha de Liquidación</th>
+                        <th>Total a Transferir</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in transferencias %}
+                    <tr>
+                        <td>{{ item.nombre_farmacia }}</td>
+                        <td>{{ item.fecha }}</td>
+                        <td class="amount">${{ item.total_transferir|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

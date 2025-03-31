@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Permisos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/permisos.css' %}">
+</head>
+<body>
+    {% include "header.html" %}
+
+    <div class="section-title">
+        <div class="section-design">
+            <h2>Editar información del usuario</h2>
+        </div>
+    </div>
+
+    <div class="permissions-container">
+        <div class="user-info">
+            <h2>Información del Usuario</h2>
+            <form method="post" action="">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <div class="label-icon-container">
+                        <i class="fas fa-user icon"></i>
+                        <label>Nombre de usuario:</label>
+                    </div>
+                    <input type="text" name="username" value="{{ user.username }}">
+                </div>
+
+                
+                <div class="form-group">
+                    <div class="label-icon-container">
+                        <i class="fas fa-user icon"></i>
+                        <label>Nombre:</label>
+                    </div>
+                    <input type="text" name="first_name" value="{{ user.first_name }}">
+                </div>
+
+                <div class="form-group">
+                    <div class="label-icon-container">
+                        <i class="fas fa-user-friends icon"></i>
+                        <label>Apellido:</label>
+                    </div>
+                    <input type="text" name="last_name" value="{{ user.last_name }}">
+                </div>
+
+                <div class="form-group">
+                    <div class="label-icon-container">
+                        <i class="fas fa-envelope icon"></i>
+                        <label>Email:</label>
+                    </div>
+                    <input type="email" name="email" value="{{ user.email }}">
+                </div>
+
+                <div class="btn-size">
+                    <button type="submit" class="btn" name="update_info">Actualizar Información</button>
+                </div>
+            </form>
+
+            <h2>Cambiar Contraseña</h2>
+            <form method="post" action="">
+                {% csrf_token %}
+                <div class="form-group">
+                    <div class="label-icon-container">
+                        <i class="fas fa-lock icon"></i>
+                        <label>Nueva Contraseña:</label>
+                    </div>
+                    <input type="password" name="new_password" placeholder="Nueva contraseña">
+                </div>
+                <div class="btn-size">
+                    <button type="submit" class="btn" name="change_password">Cambiar Contraseña</button>
+                </div>
+            </form>
+        </div>
+
+       <div class="permisos-align">
+            <!-- Permisos de sector -->
+            <div class="permissions-section">
+                <h2>Sectores asignados</h2>
+                <p>Administre los sectores asignados al usuario.</p>
+            
+                <!-- Contenedores de sectores -->
+                <div class="sector-management">
+                    <div class="sectors-list">
+                        <h3>Sectores disponibles</h3>
+                        <ul id="available-sectors">
+                            {% for sector in all_sectors %}
+                                {% if sector.nombre|lower not in assigned_sectors %}
+                                    <li data-sector-id="{{ sector.id }}">{{ sector.nombre }}</li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+            
+                    <!-- Botones para mover sectores -->
+                    <div class="sectors-buttons">
+                        <button id="add-sector-btn" class="sector-btn green" type="button">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button id="remove-sector-btn" class="sector-btn red" type="button">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </div>
+            
+                    <div class="sectors-list">
+                        <h3>Sectores asignados</h3>
+                        <ul id="assigned-sectors">
+                            {% for sector in all_sectors %}
+                                {% if sector.nombre|lower in assigned_sectors %}
+                                    <li data-sector-id="{{ sector.id }}">{{ sector.nombre }}</li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            
+                <button id="save-sectors-btn" class="btn">Guardar Sectores</button>
+            </div>
+            
+
+            <div class="permissions-section">
+                <h2>Permisos asignados</h2>
+                <p>Administre los permisos de acceso para las vistas específicas.</p>
+            </div>
+       </div>
+    </div>
+
+    <script src="{% static 'js/permisos.js' %}"></script>
+</body>
+</html>

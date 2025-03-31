@@ -1,0 +1,227 @@
+/* Estilo global */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+/* Título de la sección */
+.section-title {
+    width: 100%;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.section-title > h2 {
+    color: #222222;
+    margin-left: 25px;
+    font-weight: 800;
+    font-size: 28px;
+}
+
+.section-design {
+    width: 100%;
+    height: 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 1.8rem;
+    background: linear-gradient(90deg, rgba(0,189,255,1) 0%, rgba(143,255,255,1) 0%, rgba(113,201,228,1) 19%, rgba(95,169,212,1) 37%, rgba(87,154,204,1) 56%, rgb(64, 112, 183) 100%);
+}
+
+.section-design > h2 {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* Contenedor de permisos */
+.permissions-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Información del usuario */
+.user-info {
+    width: 100%;
+    height: 100%;
+    grid-column: 1 / span 1;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+}
+
+.user-info h2 {
+    color: #4070B7;
+    font-size: 1.4em;
+    margin-bottom: 10px;
+}
+
+/* Formulario de usuario */
+.user-info > form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 13px;
+    border-bottom: .3px solid #22222221;
+}
+
+.form-group {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+}
+
+.label-icon-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.label-icon-container .icon {
+    color: #4070B7;
+    font-size: 1em;
+}
+
+.label-icon-container label {
+    font-weight: 600;
+    font-size: 18px;
+    color: #4070B7;
+}
+
+/* Input con icono */
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 10px 15px;
+    border-radius: 50px;
+    border: 1px solid #ddd;
+    font-size: 1em;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+    border-color: #4070B7;
+    box-shadow: 0 0 5px rgba(64, 112, 183, 0.5);
+}
+
+.btn {
+    width: 100%;
+    padding: 11px;
+    background-color: #4070B7;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #35619A;
+}
+.btn-size{
+    width: 40%;
+    margin: 7px 0 5px 0;
+}
+
+/* Sección de permisos */
+.permissions-section {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.permissions-section h2 {
+    color: #4070B7;
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.permissions-section p {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    .permissions-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Estilos para el sector management */
+.sector-management {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.sectors-list {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    height: 200px;
+    overflow-y: auto;
+}
+
+.sectors-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sectors-list li {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.sectors-list li.selected {
+    background-color: #4070B7;
+    color: #fff;
+}
+
+.sector-btn {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.sector-btn.green { color: #008000; }
+.sector-btn.red { color: #ff0000; }
+
+/* Estilo para sectores seleccionados */
+ul li {
+    padding: 10px;
+    border: 1px solid #ddd;
+    margin: 5px 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+ul li.selected {
+    background-color: #4070B7;
+    color: white;
+    border-color: #35619A;
+}

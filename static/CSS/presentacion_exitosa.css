@@ -1,0 +1,41 @@
+/* Estilo general */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #F8F9FA;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    padding: 30px;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 50px;
+    text-align: center;
+}
+
+/* Check de éxito */
+.success-check {
+    margin: 20px auto;
+}
+
+.success-check img {
+    width: 100px;
+    height: 100px;
+}
+
+/* Información de la presentación */
+.presentation-info h2 {
+    color: #2ECC71;
+    font-size: 2rem;
+    margin-top: 20px;
+}
+
+.presentation-info p {
+    font-size: 1.2rem;
+    color: #333;
+    margin: 10px 0;
+}

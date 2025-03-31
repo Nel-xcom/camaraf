@@ -1,0 +1,305 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Montserrat", sans-serif;
+}
+
+/* Footer del menú */
+footer {
+    padding: 15px;
+    text-align: center;
+    font-size: 14px;
+    color: #f2f2f2;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: 55px;
+    background-color: #2ECC71;
+    align-items: center;
+}
+
+.header-logo {
+    width: 100%;
+    height: 110px;
+    display: flex;
+    justify-content: center;
+    object-fit: cover;
+}
+.header-logo > img {
+    width: 110px;
+    height: 110px;
+    display: flex;
+    object-fit: contain;
+}
+
+.header-box {
+    width: 33.3%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* hb1: menú hamburguesa */
+.hamburger-menu {
+    font-size: 24px;
+    color: #f2f2f2;
+    width: 100%;
+    padding-left: 110px;
+    display: flex;
+    align-items: center;
+}
+.hamburger-menu > i {
+    font-size: 21px;
+    cursor: pointer;
+}
+
+/* Estado inicial: menú abierto */
+.menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px; /* Ancho normal del menú */
+    height: 100%;
+    background-color: #2ECC71;
+    transition: all 0.3s ease-in-out;
+    transform: translateX(-100%); /* 🔹 Ahora inicia oculto */
+}
+
+.menu.active {
+    transform: translateX(0); /* 🔹 Solo se muestra cuando está activo */
+}
+.menu-content2 {
+    margin-top: 30px;
+}
+/* Contenedor de la 'x' */
+.menu-header {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    padding: 5px;
+}
+
+.menu-header .close-menu {
+    font-size: 24px;
+    color: #f2f2f2;
+    cursor: pointer;
+}
+
+.menu ul {
+    list-style: none;
+    padding-top: 20px;
+    text-align: left;
+}
+
+.menu ul li {
+    padding: 0 0 0 10px;
+}
+
+.menu ul li a {
+    text-decoration: none;
+    color: white;
+    font-size: 18px;
+    padding: 10px 0 10px 5px;
+    display: block;
+    transition: background 0.3s ease;
+}
+
+.menu ul li a:hover {
+    background-color: #4070B7;
+}
+
+.section-header > ul > li > a > span{
+    margin-left: 7px;
+}
+
+
+/* Menú cerrado */
+.menu.collapsed {
+    width: 80px; /* Menú colapsado */
+    transform: translateX(0); /* Mantener visible */
+}
+
+.menu.collapsed .menu-content2 ul li {
+    display: flex;
+    justify-content: center; /* Centramos horizontalmente */
+    flex-direction: column; /* Asegurar disposición vertical */
+}
+
+.menu.collapsed .menu-content2 ul li a{
+    display: flex;
+    justify-content: center;
+}
+
+.menu.collapsed .menu-content2 ul li a i {
+    font-size: 18px; /* Ajustar tamaño del ícono */
+    margin-bottom: 5px;
+}
+
+.menu.collapsed .menu-content2 ul li a span {
+    display: none; /* Ocultar texto en el menú cerrado */
+}
+
+.menu.collapsed footer{
+    text-align: center;
+}
+
+
+/* Transición del logo */
+.header-logo img {
+    transition: width 0.3s ease-in-out;
+}
+
+.menu.collapsed .header-logo img {
+    width: 50px; /* Reducir tamaño del logo */
+}
+
+.menu.collapsed .header-title h3 {
+    display: none; /* Ocultar título en el menú cerrado */
+}
+
+.menu.collapsed .header-title b {
+    display: none; /* Asegurar que el número sea visible */
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+}
+
+
+
+/* hb2: centrado del logo */
+.hb2 {
+    width: 30%;
+    height: 55px;
+}
+
+.header-box > img {
+    width: 22%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* hb3: perfil y logout */
+#logout-form{
+    width: 200px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+.logout {
+    font-size: 16px;
+    color: #f2f2f2;
+    display: flex;
+    gap: 8px;
+    text-decoration: none;
+    margin-right: 15px;
+    margin-right: 15px;
+    font-weight: 600;
+    width: 100%;
+}
+
+.logout i {
+    font-size: 21px;
+    color: #ffffff;
+}
+
+.menu-redirect > a{
+    color: #ffffff;
+    font-size: 21px;
+}
+
+.hb3 {
+    padding-right: 25px;
+    justify-content: flex-end;
+}
+
+.hb3 a {
+    margin: 0 15px;
+}
+
+.section-header {
+    margin-bottom: 25px;
+}
+
+.header-title {
+    color: #ffffff;
+    display: flex;
+    width: 70%;
+    margin-left: 10px;
+}
+.header-title > b{
+    font-size: 18px;
+    margin-right: 7px;
+}
+.header-title > h3 {
+    font-size: 18px;
+    width: 100%;
+}
+.header-title > i {
+    font-size: 18px;
+    margin-right: 15px;
+    color:#4070B7;
+}
+
+@media (max-width: 1024px) {
+    .menu {
+        width: 30%;
+    }
+
+    .notification-panel {
+        width: 350px;
+        top: 55px;
+        right: 30px;
+    }
+
+    .header-title > h3 {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 768px) {
+    .menu {
+        width: 40%;
+    }
+
+    .notification-panel {
+        width: 300px;
+        top: 50px;
+        right: 20px;
+    }
+
+    .header-title > h3 {
+        font-size: 16px;
+    }
+
+    .hamburger-menu {
+        padding-left: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .menu {
+        width: 60%;
+    }
+
+    .notification-panel {
+        width: 250px;
+        top: 45px;
+        right: 10px;
+    }
+
+    .header-title > h3 {
+        font-size: 14px;
+    }
+
+    .hamburger-menu {
+        padding-left: 20px;
+    }
+
+    .header-box img {
+        width: 50%;
+    }
+}

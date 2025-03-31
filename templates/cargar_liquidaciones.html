@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Liquidaciones</title>
+    <link rel="shortcut icon" href="/static/images/escudo-chubut.png" />
+    <link rel="stylesheet" href="/static/css/gestionar_presentaciones.css">
+</head>
+<body>
+    {% include "header.html" %}
+
+    <div class="container">
+        {% include 'timeline2.html' with step=1 %}
+        <h2>Obras sociales</h2>
+        <div class="cards">
+            <div class="card">
+                <h2>Galeno</h2>
+                <a href="{% url 'cargar_liquidacion_galeno'%}" class="load-button">Cargar Liquidación</a>
+            </div>
+
+            <div class="card">
+                <h2>OSDIPP</h2>
+                <a href="{% url 'hliquidacion'%}" class="load-button">Cargar Liquidación</a>
+            </div>
+
+            <div class="card">
+                <h2>Jerarquicos Salud</h2>
+                <a href="{% url 'cargar_liquidacion_jerarquicos'%}" class="load-button">Cargar Liquidación</a>
+            </div>
+
+            <div class="card">
+                <h2>Pami</h2>
+                <a href="{% url 'cargar_liquidacion_pami'%}" class="load-button">Cargar Liquidación</a>
+            </div>
+
+            <div class="card">
+                <h2>OspilAmpil</h2>
+                <a href="{% url 'cargar_liquidacion_ospil'%}" class="load-button">Cargar Liquidación</a>
+            </div>
+
+            <div class="card">
+                <h2>OSFATLYF</h2>
+                <a href="{% url 'cargar_liquidacion_osfatlyf'%}" class="load-button">Cargar Liquidación</a>
+            </div>
+
+        </div>
+        <h2>Tratamientos Especiales</h2>
+        <div class="cards">
+            <div class="card">
+                <h2>Pami Oncologico</h2>
+                <a href="{% url 'cargar_liquidacion_pami_oncologico'%}" class="load-button">Cargar Liquidación</a>
+            </div>
+
+            <div class="card">
+                <h2>Pami Pañales</h2>
+                <a href="{% url 'cargar_liquidacion_pami_panales'%}" class="load-button">Cargar Liquidación</a>
+            </div>
+
+            <div class="card">
+                <h2>Pami Vacunas</h2>
+                <a href="{% url 'cargar_liquidacion_pami_vacunas'%}" class="load-button">Cargar Liquidación</a>
+            </div>
+        </div>
+        <h2>ART</h2>
+        <div class="cards">
+            <div class="card">
+                <h2>Andina</h2>
+                <a href="{% url 'cargar_liquidacion_andina_art'%}" class="load-button">Cargar Liquidación</a>
+            </div>
+
+            <div class="card">
+                <h2>AsociART</h2>
+                <a href="{% url 'cargar_liquidacion_asociart'%}" class="load-button">Cargar Liquidación</a>
+            </div>
+
+            <div class="card">
+                <h2>Colonia Suiza</h2>
+                <a href="{% url 'cargar_liquidacion_coloniasuiza'%}" class="load-button">Cargar Liquidación</a>
+            </div>
+
+            <div class="card">
+                <h2>Experta</h2>
+                <a href="{% url 'cargar_liquidacion_experta'%}" class="load-button">Cargar Liquidación</a>
+            </div>
+
+            <div class="card">
+                <h2>Galeno</h2>
+                <a href="{% url 'cargar_liquidacion_galenoart'%}" class="load-button">Cargar Liquidación</a>
+            </div>
+
+            <div class="card">
+                <h2>Prevencion</h2>
+                <a href="{% url 'cargar_liquidacion_prevencion_art'%}" class="load-button">Cargar Liquidación</a>
+            </div>
+        </div>
+
+        
+    </div>
+</body>
+</html>

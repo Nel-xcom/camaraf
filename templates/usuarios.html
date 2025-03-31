@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Búsqueda de Usuarios</title>
+    <link rel="stylesheet" href="{% static 'css/usuarios.css' %}">
+</head>
+<body>
+    {% include "header.html" %}
+
+    <div class="section-title">
+        <div class="section-design">
+            <h2>Buscar usuarios</h2>
+        </div>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" placeholder="Buscar por nombre, apellido, email, etc." name="search" autocomplete="off">
+    </div>
+
+    <div class="user-results">
+        {% if usuarios %}
+            {% for user in usuarios %}
+            <a href="#">
+                <div class="user-card">
+                    <div class="user-info">
+                        <div class="h3-container">
+                            <h3>{{ user.nombre }}</h3>
+                        </div>
+                        <p><strong>Telefono:</strong> {{ user.telefono_contacto }}</p>
+                        <p><strong>Email:</strong> {{ user.email_contacto }}</p>
+                        <p><strong>Dirección:</strong> {{ user.direccion }}</p>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        {% else %}
+            <p>No se encontraron usuarios.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.querySelector('.search-bar input[name="search"]');
+            const resultsContainer = document.querySelector('.user-results');
+
+            searchInput.addEventListener('input', function() {
+                const query = searchInput.value.trim();
+                if (query.length > 2) {
+                    fetch(`/buscar_usuarios/?q=${query}`, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        resultsContainer.innerHTML = ''; // Limpiar resultados previos
+                        if (data.results.length > 0) {
+                            data.results.forEach(user => {
+                                resultsContainer.innerHTML += `
+                                    <a href="/usuarios/${user.id}/permisos/">
+                                        <div class="user-card">
+                                            <div class="user-info">
+                                                <h3>${user.username}</h3>
+                                                <p><strong>Nombre:</strong> ${user.first_name} ${user.last_name}</p>
+                                                <p><strong>Email:</strong> ${user.email}</p>
+                                                <p><strong>Sector:</strong> ${user.sector}</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                `;
+                            });
+                        } else {
+                            resultsContainer.innerHTML = '<p>No se encontraron resultados.</p>';
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                } else {
+                    resultsContainer.innerHTML = '';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

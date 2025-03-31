@@ -1,0 +1,32 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen de Cobro</title>
+    <link rel="stylesheet" href="/static/css/resumen_cobro.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    {% include 'header.html' %}
+    <div class="container">
+        <h1>Resumen de Cobro por Obra Social</h1>
+        <div class="grid-container">
+            {% for presentacion in presentaciones %}
+            <div class="card">
+                <h2>{{ presentacion.obra_social }}</h2>
+                <p><b>Período: {{ presentacion.periodo }}</b></p>
+                <canvas id="chart-{{ forloop.counter }}"></canvas>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script id="chart-data" type="application/json">
+        {{ chart_data|safe }}
+    </script>    
+    <script src="{% static 'js/resumen.js' %}"></script>
+</body>
+</html>
