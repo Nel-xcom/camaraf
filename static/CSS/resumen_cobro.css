@@ -1,10 +1,10 @@
 :root {
-    --primary-color: #2ECC71; /* Verde tipo neon */
+    --primary-color: #8cc0e8; /* Verde tipo neon */
     --secondary-color: #F8F9FA; /* Blanco suave */
     --neutral-gray: #E5E5E5; /* Gris claro */
     --font-color: #333333; /* Gris oscuro para texto */
     --error-color: #FF6B6B; /* Rojo suave para errores */
-    --success-color: #4CAF50; /* Verde para éxito */
+    --success-color: #8cc0e8; /* Verde para éxito */
     --font-family: 'Arial', sans-serif;
 }
 
@@ -22,8 +22,11 @@
 
 h1 {
     text-align: center;
-    color: var(--primary-color);
-    margin-bottom: 30px;
+    color: var(--font-color);
+    margin: 40px 0 50px 0;
+    border-bottom: .3px solid var(--neutral-gray);
+    padding-bottom: 6px;
+    width: 70%;
 }
 
 .grid-container {
@@ -62,8 +65,8 @@ h1 {
 }
 
 .card h2 {
-    font-size: 1.8em;
-    color: var(--primary-color);
+    font-size: 1.5em;
+    color: var(--font-color);
     margin-bottom: 10px;
 }
 

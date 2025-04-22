@@ -1,10 +1,10 @@
 :root {
-    --primary-color: #2ECC71; /* Verde tipo neon */
+    --primary-color: #8cc0e8; /* Verde tipo neon */
     --secondary-color: #F8F9FA; /* Blanco suave */
     --neutral-gray: #E5E5E5; /* Gris claro */
     --font-color: #333333; /* Gris oscuro para texto */
     --error-color: #FF6B6B; /* Rojo suave para errores */
-    --success-color: #4CAF50; /* Verde para éxito */
+    --success-color: #8cc0e8; /* Verde para éxito */
     --font-family: 'Arial', sans-serif;
 }
 
@@ -46,15 +46,19 @@ body {
     text-align: center;
 }
 
-header {
+.calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
+    position: relative;
+    padding: 10px 0;
+    background: var(--primary-color);
 }
 
-header > h1{
+.calendar-header > h1{
     color: var(--secondary-color);
+    z-index: 40;
 }
 
 button {

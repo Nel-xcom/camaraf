@@ -21,11 +21,13 @@
                     <div class="circle">1</div>
                     <h1>Seleccionar fecha</h1>
                 </div>
-                <header>
+                
+                <div class="calendar-header">
                     <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
-                    <h1 id="current-month">Enero 2025</h1>
+                    <h1 id="current-month"></h1>
                     <button id="next-month"><i class="fas fa-chevron-right"></i></button>
-                </header>
+                </div>
+
                 <div class="weekdays">
                     <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
                 </div>
@@ -77,14 +79,27 @@
                 <input type="text" id="selected-date" name="selected_date" readonly>
             
                 <label for="obra-social">Obra Social:</label>
+
                 <select id="obra-social" name="obra_social" required>
                     <option value="">Seleccione...</option>
                     <option value="OSDIPP">OSDIPP</option>
                     <option value="SWISS_MEDICAL">Swiss Medical</option>
                     <option value="GALENO">Galeno</option>
-                    <option value="FARMALINK">Farmalink</option>
                     <option value="PAMI">PAMI</option>
                     <option value="AVALIAN">Avalian</option>
+                    <option value="JERARQUICOS">Jerarquicos Salud</option>
+                    <option value="OSFATLYF">Osfatlyf</option>
+                    <option value="OSPILAMPIL">OspilAmpil</option>
+                    <option value="PAMIONCOLOGICO">Pami Oncologico</option>
+                    <option value="PAMIPANALES">Pami Pañales</option>
+                    <option value="PAMIVACUNAS">Pami Vacunas</option>
+                    <option value="ANDINAART">Andina ART</option>
+                    <option value="ASOCIART">Asociart</option>
+                    <option value="COLONIASUIZA">Colonia Suiza ART</option>
+                    <option value="EXPERTAART">Experta ART</option>
+                    <option value="GALENOART">Galeno ART</option>
+                    <option value="LASEGUNDA">La Segunda ART</option>
+                    <option value="PREVENCIONART">Prevención ARTS</option>
                 </select>
             
                 <label for="quincena">Quincena:</label>

@@ -16,7 +16,7 @@ class FarmaciaRegisterForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2', 
+        fields = ['id_facaf', 'username', 'email', 'password1', 'password2', 
                   'nombre', 'direccion', 'ciudad', 'provincia', 
                   'contacto_principal', 'email_contacto', 
                   'telefono_contacto', 'cuit', 'drogueria']

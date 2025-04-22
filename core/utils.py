@@ -1,5 +1,5 @@
 import pandas as pd
-from .models import LiquidacionPAMI, LiquidacionJerarquicos, LiquidacionGaleno, LiquidacionOspil, LiquidacionOsfatlyf, LiquidacionPAMIOncologico, LiquidacionPAMIPanales, LiquidacionPAMIVacunas, LiquidacionAndinaART, LiquidacionAsociart, LiquidacionColoniaSuiza, LiquidacionExperta, LiquidacionGalenoART, LiquidacionPrevencionART
+from .models import LiquidacionPAMI, LiquidacionJerarquicos, LiquidacionGaleno, LiquidacionOspil, LiquidacionOsfatlyf, LiquidacionPAMIOncologico, LiquidacionPAMIPanales, LiquidacionPAMIVacunas, LiquidacionAndinaART, LiquidacionAsociart, LiquidacionColoniaSuiza, LiquidacionExperta, LiquidacionGalenoART, LiquidacionPrevencionART, User
 from core.models import Farmacia
 from django.utils.timezone import now
 from collections import defaultdict
@@ -59,19 +59,25 @@ def procesar_liquidacion_ospil(archivo_xlsx, archivo_origen):
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 
+        # Buscar el usuario por id_facaf
+        codigo = str(codigo_farmacia).strip().upper()
+        usuario = User.objects.filter(id_facaf=codigo).first()
+
         LiquidacionOspil.objects.create(
             farmacia=farmacia,
             codigo_farmacia=codigo_farmacia,
             nombre_farmacia=nombre_farmacia,
             plan=plan,
-            fecha_liquidacion=fecha_liquidacion,
+            fecha_liquidacion=now().date(),
             importe_100=importe_100,
             a_cargo_os=a_cargo_os,
             bonificacion=bonificacion,
             nota_credito=nota_credito,
             subtotal_pagar=subtotal_pagar,
-            archivo_origen=archivo_origen
+            archivo_origen=archivo_origen,
+            user=usuario  # 👈 Relación con usuario mediante id_facaf
         )
+
 
         registros_creados += 1
 
@@ -106,7 +112,10 @@ def procesar_liquidacion_pami(archivo_xlsx, archivo_origen):
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 
-        # 💾 Guardar el archivo_origen ahora también
+        # Buscar el usuario por id_facaf
+        codigo = str(codigo_farmacia).strip().upper()
+        usuario = User.objects.filter(id_facaf=codigo).first()
+
         LiquidacionPAMI.objects.create(
             farmacia=farmacia,
             codigo_farmacia=codigo_farmacia,
@@ -118,8 +127,10 @@ def procesar_liquidacion_pami(archivo_xlsx, archivo_origen):
             bonificacion=bonificacion,
             nota_credito=nota_credito,
             subtotal_pagar=subtotal_pagar,
-            archivo_origen=archivo_origen  # 🧠 IDENTIFICADOR CLAVE
+            archivo_origen=archivo_origen,
+            user=usuario  # 👈 Esta es la línea clave que faltaba
         )
+
 
         registros_creados += 1
 
@@ -148,6 +159,10 @@ def procesar_liquidacion_pami_oncologico(archivo_xlsx, archivo_origen):
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 
+        # Buscar el usuario por id_facaf
+        codigo = str(codigo_farmacia).strip().upper()
+        usuario = User.objects.filter(id_facaf=codigo).first()
+
         LiquidacionPAMIOncologico.objects.create(
             farmacia=farmacia,
             codigo_farmacia=codigo_farmacia,
@@ -159,8 +174,10 @@ def procesar_liquidacion_pami_oncologico(archivo_xlsx, archivo_origen):
             bonificacion=bonificacion,
             nota_credito=nota_credito,
             subtotal_pagar=subtotal_pagar,
-            archivo_origen=archivo_origen
+            archivo_origen=archivo_origen,
+            user=usuario  # 👈 Relación automática
         )
+
 
         registros_creados += 1
 
@@ -194,6 +211,10 @@ def procesar_liquidacion_pami_panales(archivo_xlsx, archivo_origen):
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 
+        # Buscar el usuario por id_facaf
+        codigo = str(codigo_farmacia).strip().upper()
+        usuario = User.objects.filter(id_facaf=codigo).first()
+
         LiquidacionPAMIPanales.objects.create(
             farmacia=farmacia,
             codigo_farmacia=codigo_farmacia,
@@ -205,8 +226,10 @@ def procesar_liquidacion_pami_panales(archivo_xlsx, archivo_origen):
             bonificacion=bonificacion,
             nota_credito=nota_credito,
             subtotal_pagar=subtotal_pagar,
-            archivo_origen=archivo_origen
+            archivo_origen=archivo_origen,
+            user=usuario  # ✅ Relación automática
         )
+
 
         registros_creados += 1
 
@@ -235,6 +258,10 @@ def procesar_liquidacion_pami_vacunas(archivo_xlsx, archivo_origen):
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 
+        # Buscar el usuario por id_facaf
+        codigo = str(codigo_farmacia).strip().upper()
+        usuario = User.objects.filter(id_facaf=codigo).first()
+
         LiquidacionPAMIVacunas.objects.create(
             farmacia=farmacia,
             codigo_farmacia=codigo_farmacia,
@@ -246,7 +273,8 @@ def procesar_liquidacion_pami_vacunas(archivo_xlsx, archivo_origen):
             bonificacion=bonificacion,
             nota_credito=nota_credito,
             subtotal_pagar=subtotal_pagar,
-            archivo_origen=archivo_origen
+            archivo_origen=archivo_origen,
+            user=usuario  # ✅ Relación automática
         )
 
         registros_creados += 1
@@ -277,6 +305,10 @@ def procesar_liquidacion_jerarquicos(archivo_xlsx, archivo_origen):
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 
+        # Buscar el usuario por id_facaf
+        codigo = str(codigo_farmacia).strip().upper()
+        usuario = User.objects.filter(id_facaf=codigo).first()
+
         LiquidacionJerarquicos.objects.create(
             farmacia=farmacia,
             codigo_farmacia=codigo_farmacia,
@@ -288,8 +320,10 @@ def procesar_liquidacion_jerarquicos(archivo_xlsx, archivo_origen):
             bonificacion=bonificacion,
             nota_credito=nota_credito,
             subtotal_pagar=subtotal_pagar,
-            archivo_origen=archivo_origen  # ✅ Aquí lo agregamos
+            archivo_origen=archivo_origen,
+            user=usuario  # 👈 Relación correcta
         )
+
 
         registros_creados += 1
 
@@ -360,6 +394,10 @@ def procesar_liquidacion_andina_art(archivo_xlsx, archivo_origen):
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 
+        # Buscar el usuario por id_facaf
+        codigo = str(codigo_farmacia).strip().upper()
+        usuario = User.objects.filter(id_facaf=codigo).first()
+
         LiquidacionAndinaART.objects.create(
             farmacia=farmacia,
             codigo_farmacia=codigo_farmacia,
@@ -371,8 +409,10 @@ def procesar_liquidacion_andina_art(archivo_xlsx, archivo_origen):
             bonificacion=bonificacion,
             nota_credito=nota_credito,
             subtotal_pagar=subtotal_pagar,
-            archivo_origen=archivo_origen
+            archivo_origen=archivo_origen,
+            user=usuario  # ✅ Relación automática
         )
+
 
         registros_creados += 1
 
@@ -401,6 +441,10 @@ def procesar_liquidacion_asociart(archivo_xlsx, archivo_origen):
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 
+        # Buscar el usuario por id_facaf
+        codigo = str(codigo_farmacia).strip().upper()
+        usuario = User.objects.filter(id_facaf=codigo).first()
+
         LiquidacionAsociart.objects.create(
             farmacia=farmacia,
             codigo_farmacia=codigo_farmacia,
@@ -412,8 +456,10 @@ def procesar_liquidacion_asociart(archivo_xlsx, archivo_origen):
             bonificacion=bonificacion,
             nota_credito=nota_credito,
             subtotal_pagar=subtotal_pagar,
-            archivo_origen=archivo_origen
+            archivo_origen=archivo_origen,
+            user=usuario  # ✅ Relación automática
         )
+
 
         registros_creados += 1
 
@@ -443,6 +489,10 @@ def procesar_liquidacion_coloniasuiza(archivo_xlsx, archivo_origen):
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 
+        # Buscar el usuario por id_facaf
+        codigo = str(codigo_farmacia).strip().upper()
+        usuario = User.objects.filter(id_facaf=codigo).first()
+
         LiquidacionColoniaSuiza.objects.create(
             farmacia=farmacia,
             codigo_farmacia=codigo_farmacia,
@@ -454,8 +504,10 @@ def procesar_liquidacion_coloniasuiza(archivo_xlsx, archivo_origen):
             bonificacion=bonificacion,
             nota_credito=nota_credito,
             subtotal_pagar=subtotal_pagar,
-            archivo_origen=archivo_origen
+            archivo_origen=archivo_origen,
+            user=usuario  # ✅ Relación automática
         )
+
 
         registros_creados += 1
 
@@ -484,6 +536,10 @@ def procesar_liquidacion_experta(archivo_xlsx, archivo_origen):
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 
+        # Buscar el usuario por id_facaf
+        codigo = str(codigo_farmacia).strip().upper()
+        usuario = User.objects.filter(id_facaf=codigo).first()
+
         LiquidacionExperta.objects.create(
             farmacia=farmacia,
             codigo_farmacia=codigo_farmacia,
@@ -495,8 +551,11 @@ def procesar_liquidacion_experta(archivo_xlsx, archivo_origen):
             bonificacion=bonificacion,
             nota_credito=nota_credito,
             subtotal_pagar=subtotal_pagar,
-            archivo_origen=archivo_origen
+            archivo_origen=archivo_origen,
+            user=usuario  # ✅ Relación automática
         )
+
+
         registros_creados += 1
 
     return registros_creados
@@ -565,6 +624,10 @@ def procesar_liquidacion_prevencion_art(archivo_xlsx, archivo_origen):
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 
+        # Buscar el usuario por id_facaf
+        codigo = str(codigo_farmacia).strip().upper()
+        usuario = User.objects.filter(id_facaf=codigo).first()
+
         LiquidacionPrevencionART.objects.create(
             farmacia=farmacia,
             codigo_farmacia=codigo_farmacia,
@@ -576,47 +639,133 @@ def procesar_liquidacion_prevencion_art(archivo_xlsx, archivo_origen):
             bonificacion=bonificacion,
             nota_credito=nota_credito,
             subtotal_pagar=subtotal_pagar,
-            archivo_origen=archivo_origen
+            archivo_origen=archivo_origen,
+            user=usuario  # ✅ Asociación automática
         )
+
 
         registros_creados += 1
 
     return registros_creados
 
 
-def obtener_detalle_transferencias():
+"""def obtener_transferencias_pami_por_sociedad():
+
+    datos = defaultdict(lambda: {
+        "sociedad": None,
+        "nombre_fantasia": None,
+        "cuit": None,
+        "cbu": None,
+        "importe_total": 0,
+        "comision": 0,
+        "total_transferir": 0
+    })
+
+    no_asociadas = []
+
+    # Solo analizamos la liquidación más reciente
+    ultimo_archivo = (
+        LiquidacionPAMI.objects.values_list("archivo_origen", flat=True)
+        .order_by("-creado_en")
+        .first()
+    )
+
+    if not ultimo_archivo:
+        return [], []
+
+    liquidaciones = LiquidacionPAMI.objects.filter(archivo_origen=ultimo_archivo)
+
+    for lq in liquidaciones:
+        user = getattr(lq, "user", None)
+
+        if user and user.farmacia:
+            sociedad = user.farmacia.nombre
+            datos[sociedad]["sociedad"] = sociedad
+            datos[sociedad]["nombre_fantasia"] = user.username
+            datos[sociedad]["cuit"] = user.farmacia.cuit
+            datos[sociedad]["cbu"] = user.farmacia.cbu  # Asumimos que drogueria contiene CBU
+            datos[sociedad]["importe_total"] += float(lq.subtotal_pagar)
+        else:
+            no_asociadas.append(lq)
+
+    for item in datos.values():
+        item["comision"] = round(item["importe_total"] * 0.0075, 2)
+        item["total_transferir"] = round(item["importe_total"] - item["comision"], 2)
+
+    return list(datos.values()), no_asociadas
+"""
+
+def obtener_transferencias_por_sociedad():
     """
-    Obtiene el detalle de los montos a transferir por grupo de farmacias y por liquidación,
-    agrupándolos correctamente.
+    Devuelve un diccionario agrupado por obra social,
+    y dentro de cada obra social agrupa por sociedad (nombre de Farmacia).
+    Excluye Galeno y OSFATLYF.
     """
-    transferencias_por_obra = {
-        "PAMI": defaultdict(float),
-        "Galeno": defaultdict(float),
-        "Jerárquicos Salud": defaultdict(float)
+    from .models import (
+        LiquidacionPAMI, LiquidacionJerarquicos, LiquidacionOspil,
+        LiquidacionPAMIOncologico, LiquidacionPAMIPanales, LiquidacionPAMIVacunas,
+        LiquidacionAndinaART, LiquidacionAsociart, LiquidacionColoniaSuiza,
+        LiquidacionExperta, LiquidacionGalenoART, LiquidacionPrevencionART, User
+    )
+
+    MODELOS = {
+        "PAMI": LiquidacionPAMI,
+        "Jerárquicos Salud": LiquidacionJerarquicos,
+        "OSPIL": LiquidacionOspil,
+        "PAMI Oncológico": LiquidacionPAMIOncologico,
+        "PAMI Pañales": LiquidacionPAMIPanales,
+        "PAMI Vacunas": LiquidacionPAMIVacunas,
+        "Andina ART": LiquidacionAndinaART,
+        "Asociart": LiquidacionAsociart,
+        "Colonia Suiza": LiquidacionColoniaSuiza,
+        "Experta ART": LiquidacionExperta,
+        "Galeno ART": LiquidacionGalenoART,
+        "Prevención ART": LiquidacionPrevencionART,
     }
 
-    # Recorrer liquidaciones PAMI
-    for liquidacion in LiquidacionPAMI.objects.all():
-        nombre_farmacia = liquidacion.nombre_farmacia.strip().lower()
-        transferencias_por_obra["PAMI"][(nombre_farmacia, liquidacion.fecha_liquidacion)] += float(liquidacion.subtotal_pagar)
+    resultado = {}
+    no_asociadas_total = {}
 
-    # Recorrer liquidaciones Galeno
-    for liquidacion in LiquidacionGaleno.objects.all():
-        nombre_farmacia = liquidacion.prestador.strip().lower()
-        transferencias_por_obra["Galeno"][(nombre_farmacia, liquidacion.fecha)] += float(liquidacion.importe_liquidado)
+    for nombre_obra, Modelo in MODELOS.items():
+        datos = defaultdict(lambda: {
+            "sociedad": None,
+            "nombre_fantasia": None,
+            "cuit": None,
+            "cbu": None,
+            "importe_total": 0,
+            "comision": 0,
+            "total_transferir": 0
+        })
+        no_asociadas = []
 
-    # Recorrer liquidaciones Jerárquicos
-    for liquidacion in LiquidacionJerarquicos.objects.all():
-        nombre_farmacia = liquidacion.nombre_farmacia.strip().lower()
-        transferencias_por_obra["Jerárquicos Salud"][(nombre_farmacia, liquidacion.fecha_liquidacion)] += float(liquidacion.subtotal_pagar)
+        # Obtener último archivo cargado
+        ultimo_archivo = Modelo.objects.values_list("archivo_origen", flat=True).order_by("-creado_en").first()
+        if not ultimo_archivo:
+            continue
 
-    # Convertimos a un formato adecuado para la plantilla
-    resultado = {
-        obra_social: [{"nombre_farmacia": k[0].title(), "fecha": k[1], "total_transferir": v} for k, v in data.items()]
-        for obra_social, data in transferencias_por_obra.items()
-    }
+        registros = Modelo.objects.filter(archivo_origen=ultimo_archivo)
 
-    return resultado
+        for lq in registros:
+            user = getattr(lq, "user", None)
+            if user and user.farmacia:
+                sociedad = user.farmacia.nombre
+                datos[sociedad]["sociedad"] = sociedad
+                datos[sociedad]["nombre_fantasia"] = user.username
+                datos[sociedad]["cuit"] = user.farmacia.cuit
+                datos[sociedad]["cbu"] = user.farmacia.cbu
+                datos[sociedad]["importe_total"] += float(lq.subtotal_pagar)
+            else:
+                no_asociadas.append(lq)
+
+        for item in datos.values():
+            item["comision"] = round(item["importe_total"] * 0.0075, 2)
+            item["total_transferir"] = round(item["importe_total"] - item["comision"], 2)
+
+        resultado[nombre_obra] = list(datos.values())
+        no_asociadas_total[nombre_obra] = no_asociadas
+
+    return resultado, no_asociadas_total
+
 
 def obtener_datos_panel():
     """

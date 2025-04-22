@@ -1,5 +1,5 @@
 :root {
-    --primary-color: #2ECC71; /* Verde tipo neon */
+    --primary-color: #8cc0e8; /* Verde tipo neon */
     --secondary-color: #F8F9FA; /* Blanco suave */
     --neutral-gray: #E5E5E5; /* Gris claro */
     --font-color: #333333; /* Gris oscuro para texto */
@@ -27,10 +27,11 @@ body {
 .container > h1{
     display: flex;
     justify-content: start;
+    color: #3a3a3a;
 }
 
 .container > h2{
-    color: #2ECC71;
+    color: var(--font-color);
     padding-bottom: 10px;
     margin: 55px 0 15px 0;
     border-bottom: .3px solid #aaaaaa61;
@@ -44,7 +45,7 @@ body {
 h1 {
     text-align: center;
     font-size: 2rem;
-    margin-bottom: 30px;
+    margin: 45px 0 30px 0;
     color: var(--primary-color);
 }
 
@@ -65,8 +66,8 @@ h1 {
 }
 
 .card h2 {
-    font-size: 1.5rem;
-    color: var(--primary-color);
+    font-size: 1.25rem;
+    color: var(--font-color);
     margin-bottom: 10px;
 }
 
@@ -82,12 +83,12 @@ h1 {
 }
 
 .load-button:hover {
-    background-color: #28A65D;
+    background-color: #6b93b2;
 }
 
 /* cargar_datos.css */
 :root {
-    --primary-color: #2ECC71; /* Verde tipo neon */
+    --primary-color: #8cc0e8; /* Verde tipo neon */
     --secondary-color: #F8F9FA; /* Blanco suave */
     --neutral-gray: #E5E5E5; /* Gris claro */
     --font-color: #333333; /* Gris oscuro para texto */

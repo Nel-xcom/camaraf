@@ -19,11 +19,11 @@ document.addEventListener('DOMContentLoaded', function() {
             new Chart(canvas, {
                 type: 'bar',
                 data: {
-                    labels: ['Importe 100%', 'Importe Liquidado'],
+                    labels: ['Importe total a liquidar', 'Importe Liquidado'],
                     datasets: [{
                         label: 'Montos ($)',
                         data: [item.importe_100, importeLiquidado],
-                        backgroundColor: ['#2ECC71', '#4070b7']
+                        backgroundColor: ['#8cc0e8', '#4070b7']
                     }]
                 },
                 options: {

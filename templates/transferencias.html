@@ -15,28 +15,35 @@
     <div class="container">
         <div class="content-wrapper">
             <h2>Resumen de Transferencias</h2>
-            
-            {% for obra_social, transferencias in transferencias_por_obra.items %}
-            <h3>Liquidación {{ obra_social }}</h3>
+
+            {% for obra_social, transferencias in resumen_por_obra.items %}
             <table class="summary-table">
+                <h3>Liquidación {{ obra_social }}</h3>
                 <thead>
                     <tr>
                         <th>Sociedad</th>
-                        <th>Fecha de Liquidación</th>
-                        <th>Total</th>
+                        <th>CUIT</th>
+                        <th>CBU</th>
+                        <th>Importe Total</th>
+                        <th>Comisión (0,75%)</th>
+                        <th>Total a transferir</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in transferencias %}
                     <tr>
-                        <td>{{ item.nombre_farmacia }}</td>
-                        <td>{{ item.fecha }}</td>
+                        <td>{{ item.sociedad }}</td>
+                        <td>{{ item.cuit }}</td>
+                        <td>{{ item.cbu }}</td>
+                        <td>${{ item.importe_total|floatformat:2 }}</td>
+                        <td>${{ item.comision|floatformat:2 }}</td>
                         <td class="amount">${{ item.total_transferir|floatformat:2 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
             {% endfor %}
+
         </div>
     </div>
 </body>

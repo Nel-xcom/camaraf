@@ -12,7 +12,7 @@
 <body>
     {% include 'header.html' %}
     <div class="container">
-        <h1>Resumen de Cobro por Obra Social</h1>
+        <h1>Control de pagos por obra social</h1>
         <div class="grid-container">
             {% for presentacion in presentaciones %}
             <div class="card">
@@ -27,6 +27,7 @@
     <script id="chart-data" type="application/json">
         {{ chart_data|safe }}
     </script>    
+    
     <script src="{% static 'js/resumen.js' %}"></script>
 </body>
 </html>

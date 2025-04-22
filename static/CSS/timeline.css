@@ -34,8 +34,8 @@
 }
 
 .timeline-step.completed .circle {
-    background-color: #2ecc71;
-    border-color: #2ecc71;
+    background-color: #8cc0e8;
+    border-color: #8cc0e8;
     color: white;
     animation: pulse 1s infinite;
 }
@@ -48,17 +48,17 @@
 }
 
 .timeline-line.completed {
-    background-color: #2ecc71;
+    background-color: #8cc0e8;
 }
 
 @keyframes pulse {
     0% {
-        box-shadow: 0 0 5px rgba(46, 204, 113, 0.5);
+        box-shadow: 0 0 5px #8cc0e8;
     }
     50% {
-        box-shadow: 0 0 15px rgba(46, 204, 113, 0.7);
+        box-shadow: 0 0 15px #8cc0e8;
     }
     100% {
-        box-shadow: 0 0 5px rgba(46, 204, 113, 0.5);
+        box-shadow: 0 0 5px #8cc0e8;
     }
 }

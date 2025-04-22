@@ -1,39 +1,69 @@
-#--IMPORTS
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.db import models
+# ────────────────────────────────
+# 🧩 Standard Library
+# ────────────────────────────────
+import calendar
+import openpyxl
+import pandas as pd
+from collections import Counter, defaultdict
 from datetime import datetime, date, timedelta
+import json
+
+# ────────────────────────────────
+# 🔧 Django Core & Utilities
+# ────────────────────────────────
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth import login as auth_login
-from django.contrib.auth.forms import AuthenticationForm
-from django.http import JsonResponse
-from django.http import HttpResponseForbidden
-from django.views.decorators.http import require_POST
-from django.db.models import Q, Count, F, ExpressionWrapper, DurationField, FloatField
-from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.contrib.auth.models import Permission
+from django.contrib.auth.views import PasswordResetView
+from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
+from django.db import models
+from django.db.models import (
+    Q, Count, F, Value, CharField,
+    ExpressionWrapper, DurationField, FloatField
+)
+from django.db.models.functions import Concat
+from django.http import JsonResponse, HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
-import json
-from django.http import JsonResponse
-from django.db.models import Value, CharField
-from django.db.models.functions import Concat
-from collections import Counter, defaultdict
-from django.core.paginator import Paginator
-from django.core.exceptions import ValidationError
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
-from django.contrib.auth.views import PasswordResetView
-from django.urls import reverse_lazy
-from .forms import FarmaciaRegisterForm, CustomLoginForm, CustomPasswordResetForm, Farmacia, CargaDatosForm, CargaDatosFormAvalian, CargaDatosFormOSDIPP, CargaDatosFormPAMI, LiquidacionPAMIForm, LiquidacionJerarquicosForm, LiquidacionGalenoForm, LiquidacionOsfatlyfForm, LiquidacionAsociartForm, LiquidacionPrevencionARTForm
-from .models import CargaDatos, Presentacion, Liquidacion, LiquidacionGaleno, User, LiquidacionPAMI, LiquidacionJerarquicos, LiquidacionOspil, LiquidacionOsfatlyf, LiquidacionPAMIOncologico, LiquidacionPAMIPanales, LiquidacionPAMIVacunas, LiquidacionAndinaART, LiquidacionAsociart, LiquidacionColoniaSuiza, LiquidacionExperta, LiquidacionGalenoART, LiquidacionPrevencionART
-import pandas as pd
-import openpyxl
-import calendar
-from .utils import procesar_liquidacion_pami, procesar_liquidacion_jerarquicos, obtener_detalle_transferencias, obtener_datos_panel, procesar_liquidacion_galeno, procesar_liquidacion_ospil, procesar_liquidacion_osfatlyf, procesar_liquidacion_pami_oncologico, procesar_liquidacion_pami_panales, procesar_liquidacion_pami_vacunas, procesar_liquidacion_andina_art, procesar_liquidacion_asociart, procesar_liquidacion_coloniasuiza, procesar_liquidacion_experta, procesar_liquidacion_galenoart, procesar_liquidacion_prevencion_art
+from django.views.decorators.http import require_http_methods, require_POST
+
+# ────────────────────────────────
+# 📦 Local Imports
+# ────────────────────────────────
+from .forms import (
+    CargaDatosForm, CargaDatosFormAvalian, CargaDatosFormOSDIPP, CargaDatosFormPAMI,
+    CustomLoginForm, CustomPasswordResetForm,
+    FarmaciaRegisterForm, LiquidacionPAMIForm, LiquidacionJerarquicosForm,
+    LiquidacionGalenoForm, LiquidacionOsfatlyfForm, LiquidacionAsociartForm,
+    LiquidacionPrevencionARTForm
+)
+from .models import (
+    CargaDatos, Presentacion, User, Farmacia,
+    Liquidacion, LiquidacionGaleno, LiquidacionPAMI, LiquidacionJerarquicos,
+    LiquidacionOspil, LiquidacionOsfatlyf, LiquidacionPAMIOncologico,
+    LiquidacionPAMIPanales, LiquidacionPAMIVacunas, LiquidacionAndinaART,
+    LiquidacionAsociart, LiquidacionColoniaSuiza, LiquidacionExperta,
+    LiquidacionGalenoART, LiquidacionPrevencionART
+)
+from .utils import (
+    obtener_datos_panel,
+    procesar_liquidacion_pami, procesar_liquidacion_jerarquicos,
+    procesar_liquidacion_galeno, procesar_liquidacion_ospil,
+    procesar_liquidacion_osfatlyf, procesar_liquidacion_pami_oncologico,
+    procesar_liquidacion_pami_panales, procesar_liquidacion_pami_vacunas,
+    procesar_liquidacion_andina_art, procesar_liquidacion_asociart,
+    procesar_liquidacion_coloniasuiza, procesar_liquidacion_experta,
+    procesar_liquidacion_galenoart, procesar_liquidacion_prevencion_art,
+    #obtener_transferencias_pami_por_sociedad
+    obtener_transferencias_por_sociedad
+)
 
 #----
 
@@ -862,13 +892,16 @@ def eliminar_liquidacion_prevencion_art(request):
     return JsonResponse({"status": "error"}, status=400)
 
 
+@login_required
 def transferencias_tesorera(request):
-    """
-    Vista que muestra el detalle de transferencias por farmacia y por liquidación.
-    """
-    transferencias_por_obra = obtener_detalle_transferencias()
+    resumen_por_obra, sin_relacion = obtener_transferencias_por_sociedad()
 
-    return render(request, "transferencias.html", {"transferencias_por_obra": transferencias_por_obra})
+    return render(request, "transferencias.html", {
+        "resumen_por_obra": resumen_por_obra,
+        "sin_relacion": sin_relacion
+    })
+
+
 
 def panel_liquidaciones(request):
     """

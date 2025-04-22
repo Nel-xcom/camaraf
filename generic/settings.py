@@ -28,9 +28,9 @@ SECRET_KEY = 'django-insecure-@!d8$7j111@svy+m%lbd(k2r!bj+2x&#c26cudy$-08j=fpp=h
 DEBUG = True
 
 """
-ALLOWED_HOSTS = ["3.92.180.141", "localhost", "127.0.0.1"]
-"""
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+"""
+ALLOWED_HOSTS = ["3.92.180.141", "localhost", "127.0.0.1"]
 
 AUTH_USER_MODEL = 'core.User' 
 
@@ -83,20 +83,19 @@ WSGI_APPLICATION = 'generic.wsgi.application'
 """
 DATABASES = {
     'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+"""
+DATABASES = {
+    'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'camara',
         'USER': 'camara_db',
         'PASSWORD': 'Batman1116',
         'HOST': 'camara.cp686y6eaume.us-east-1.rds.amazonaws.com',
         'PORT': '5432',
-    }
-}
-"""
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -124,7 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-es'
 
 TIME_ZONE = 'UTC'
 

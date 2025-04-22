@@ -1,10 +1,10 @@
 :root {
-    --primary-color: #2ECC71; /* Verde tipo neon */
+    --primary-color: #8cc0e8; /* Verde tipo neon */
     --secondary-color: #F8F9FA; /* Blanco suave */
     --neutral-gray: #E5E5E5; /* Gris claro */
     --font-color: #333333; /* Gris oscuro para texto */
     --error-color: #FF6B6B; /* Rojo suave para errores */
-    --success-color: #4CAF50; /* Verde para éxito */
+    --success-color: #8cc0e8; /* Verde para éxito */
     --font-family: 'Arial', sans-serif;
 }
 
@@ -40,8 +40,8 @@ body {
 h1 {
     text-align: start;
     font-size: 2rem;
-    margin-bottom: 20px;
-    color: var(--primary-color);
+    margin:55px 0 20px 0;
+    color: var(--font-color);
 }
 
 .form-group {
@@ -54,7 +54,9 @@ input, select, textarea {
     border: 1px solid var(--neutral-gray);
     border-radius: 5px;
     margin-top: 5px;
+    margin-bottom: 8px;
     font-size: 1rem;
+    box-shadow: 0 0 3px 1px rgba(0, 0, 0, 0.1);
 }
 
 input:focus, select:focus, textarea:focus {
@@ -88,7 +90,7 @@ label {
 }
 
 .btn-success:hover {
-    background-color: #28A65D;
+    background-color: #6185a1;
     transform: scale(1.02);
 }
 
