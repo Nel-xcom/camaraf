@@ -1,6 +1,6 @@
 /* login.css */
 :root {
-    --primary-color: #2ECC71; /* Verde tipo neon */
+    --primary-color: #8cc0e8; /* Verde tipo neon */
     --secondary-color: #F8F9FA; /* Blanco suave */
     --neutral-gray: #E5E5E5; /* Gris claro */
     --font-color: #333333; /* Gris oscuro para texto */
@@ -90,11 +90,11 @@ button {
 }
 
 button:hover {
-    background-color: #28A65D; /* Oscurecimiento del verde */
+    background-color: #53738b; /* Oscurecimiento del verde */
 }
 
 button:active {
-    background-color: #1D7A46;
+    background-color: #435d70;
 }
 
 .extra-links {

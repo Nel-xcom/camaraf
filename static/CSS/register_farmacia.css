@@ -1,11 +1,11 @@
 /* register_farmacia.css */
 :root {
-    --primary-color: #2ECC71; /* Verde tipo neon */
+    --primary-color: #8cc0e8; /* Verde tipo neon */
     --secondary-color: #F8F9FA; /* Blanco suave */
     --neutral-gray: #E5E5E5; /* Gris claro */
     --font-color: #333333; /* Gris oscuro para texto */
     --error-color: #FF6B6B; /* Rojo suave para errores */
-    --success-color: #4CAF50; /* Verde para éxito */
+    --success-color: #8cc0e8; /* Verde para éxito */
     --font-family: 'Arial', sans-serif;
 }
 
@@ -84,11 +84,11 @@ button {
 }
 
 button:hover {
-    background-color: #28A65D; /* Oscurecimiento del verde */
+    background-color: #557288; /* Oscurecimiento del verde */
 }
 
 button:active {
-    background-color: #1D7A46;
+    background-color: #41596b;
 }
 
 .message {
@@ -108,7 +108,7 @@ button:active {
 .message-success {
     background-color: var(--success-color);
     color: white;
-    border: 1px solid green;
+    border: 1px solid 8cc0e8;
 }
 
 .helptext{
@@ -116,6 +116,18 @@ button:active {
     border: .3px solid var(--primary-color);
     border-radius: 15px;
     padding: 15px;
+}
+
+form > ul{
+    list-style: none;
+    padding: 8px;
+    text-align: left;
+    font-size: 16px;
+    color: var(--primary-color);
+    border-radius: 9px;
+    font-weight: 600;
+    width: 100%;
+    border: .3px solid var(--primary-color);
 }
 
 /* Responsive Design */

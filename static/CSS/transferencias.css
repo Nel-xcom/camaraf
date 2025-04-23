@@ -4,7 +4,7 @@
     --neutral-gray: #E5E5E5; /* Gris claro */
     --font-color: #333333; /* Gris oscuro para texto */
     --error-color: #FF6B6B; /* Rojo suave para errores */
-    --success-color: #8cc0e8; /* Verde para éxito */
+    --success-color: #75bb75; /* Verde para éxito */
     --font-family: 'Arial', sans-serif;
 }
 
@@ -72,3 +72,56 @@ h2 {
     font-weight: bold;
     color: var(--success-color);
 }
+
+/* Checkbox */
+.checkbox-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .styled-checkbox {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #8cc0e8;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .styled-checkbox:checked {
+    background-color: #fff;
+    border-color: #8cc0e8;
+  }
+  
+  .styled-checkbox:checked::after {
+    content: "✔";
+    color: green;
+    position: absolute;
+    top: -2px;
+    left: 3px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  /* Botón con pulgar */
+  .approve-button {
+    border: 2px solid #8cc0e8;
+    background-color: #8cc0e81e;
+    color: #8cc0e8;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+  }
+  
+  .approve-button:hover {
+    background-color: #8cc0e838;
+  }
+
+  .paid-row {
+    background-color: #e5f8e5 !important; /* verde suave */
+    transition: background-color 0.3s ease;
+  }

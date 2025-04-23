@@ -1,4 +1,6 @@
 {% load static %}
+{% load format_filters %}
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -20,24 +22,37 @@
             <table class="summary-table">
                 <h3>Liquidación {{ obra_social }}</h3>
                 <thead>
-                    <tr>
+                    <tr <tr data-id="{{ item.sociedad|slugify }}-{{ forloop.counter }}">                        >
                         <th>Sociedad</th>
                         <th>CUIT</th>
                         <th>CBU</th>
                         <th>Importe Total</th>
                         <th>Comisión (0,75%)</th>
                         <th>Total a transferir</th>
+                        <th></th> <!-- checkbox -->
+                        <th></th> <!-- botón -->
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in transferencias %}
-                    <tr>
+                    <tr data-id="{{ item.sociedad|slugify }}-{{ forloop.counter }}">
                         <td>{{ item.sociedad }}</td>
                         <td>{{ item.cuit }}</td>
                         <td>{{ item.cbu }}</td>
-                        <td>${{ item.importe_total|floatformat:2 }}</td>
-                        <td>${{ item.comision|floatformat:2 }}</td>
-                        <td class="amount">${{ item.total_transferir|floatformat:2 }}</td>
+                        <td>${{ item.importe_total|formato_pesos }}</td>
+                        <td>${{ item.comision|formato_pesos }}</td>
+                        <td>${{ item.total_transferir|formato_pesos }}</td>
+                        <td>
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" class="styled-checkbox">
+                                <span class="custom-check"></span>
+                            </label>
+                        </td>
+                        <td>
+                            <button class="approve-button">
+                                <i class="fas fa-dollar-sign"></i>
+                            </button>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -46,5 +61,7 @@
 
         </div>
     </div>
+
+    <script src="{% static 'js/transferencias.js' %}"></script>
 </body>
 </html>
