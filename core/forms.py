@@ -13,10 +13,11 @@ class FarmaciaRegisterForm(UserCreationForm):
     telefono_contacto = forms.CharField(max_length=15)
     cuit = forms.CharField(max_length=15)
     drogueria = forms.CharField(max_length=255)
+    cbu = forms.CharField(max_length=55, required=False)
 
     class Meta:
         model = User
-        fields = ['id_facaf', 'username', 'email', 'password1', 'password2', 
+        fields = ['id_facaf', 'cbu', 'username', 'email', 'password1', 'password2', 
                   'nombre', 'direccion', 'ciudad', 'provincia', 
                   'contacto_principal', 'email_contacto', 
                   'telefono_contacto', 'cuit', 'drogueria']

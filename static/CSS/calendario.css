@@ -369,10 +369,11 @@ button:hover {
     transition: background 0.3s;
     width: 100%;
     font-weight: bold;
+    margin-top: 15px;
 }
 
 .btn-save:hover {
-    background: #28A65D;
+    background: #364a5a;
 }
 
 /* 🔹 Contenedor del vector */

@@ -18,7 +18,7 @@
         <div class="calendar-section">
             <div class="calendar-container">
 
-                <h1>Calendario de presentaciónes</h1>
+                <h1>Calendario de presentaciones</h1>
 
                 <div class="calendar-header">
                     <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
@@ -41,7 +41,26 @@
                 
             </div>
         </div>
-
+        
+        <div class="presentations-section">
+            <div class="calendar-tit">
+                <h1>Fechas de entrega</h1>
+            </div>
+            <ul id="presentation-list">
+                {% for presentacion in presentaciones %}
+                <li class="presentation-item">
+                    <div class="presentation-info">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span class="presentation-date">{{ presentacion.fecha|date:"d/m/Y" }}</span>
+                        <span class="presentation-social">{{ presentacion.obra_social }}</span>
+                        <span class="presentation-quincena">{{ presentacion.get_quincena_display }}</span>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="no-presentations">No hay presentaciones programadas para este mes.</li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 
 </body>

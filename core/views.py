@@ -243,6 +243,10 @@ def calendar_farmacias(request):
     today = now()
     year, month = today.year, today.month
 
+    presentaciones = Presentacion.objects.filter(
+            fecha__year=today.year, fecha__month=today.month
+        ).order_by('fecha')
+    
     # Obtener la cantidad de días del mes actual
     num_dias = calendar.monthrange(year, month)[1]
     
@@ -252,6 +256,7 @@ def calendar_farmacias(request):
     return render(request, 'calendar_farmacias.html', {
         "dias_del_mes": dias_del_mes,  # Enviamos la lista de fechas
         "mes_actual": today.strftime('%Y-%m'),  # Enviamos el mes actual formateado
+        "presentaciones": presentaciones,  # Enviamos las presentaciones del mes actual
     })
 
 @login_required

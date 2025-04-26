@@ -28,13 +28,18 @@ body {
 
 .calendar-tit {
     display: flex;
-    margin: 0 0 10px 0;
+    margin: 0 0 25px 0;
+    padding-top: 20px;
 }
 
 .calendar-tit > h1 {
-    margin-left: 25px;
-    color: var(--primary-color);
-    font-size: 27px;
+    width: 100%;
+    color: var(--font-color);
+    padding-bottom: 4px;
+    font-size: 1.7rem;
+    margin: 25px 0 0 0;
+    border-bottom: .3px solid var(--neutral-gray);
+    text-align: center;
 }
 
 .calendar-container {
@@ -51,7 +56,7 @@ body {
     color: var(--font-color);
     padding-bottom: 4px;
     font-size: 1.8rem;
-    margin: 25px 0 45px 0;
+    margin: 25px 0 25px 0;
     border-bottom: .3px solid var(--neutral-gray);
 }
 
@@ -136,11 +141,11 @@ button:hover {
     justify-content: center;
     align-content: center;
     width: 100%;
-    padding: 30px 50px;
+    padding: 30px 30px 20px 40px;
 }
 
 .calendar-section {
-    width: 90%;
+    width: 70%;
     height: 100%;
     margin-left: 70px;
 }
@@ -150,7 +155,7 @@ button:hover {
     background: white;
     padding: 10px;
     text-align: center;
-    width: 190px;
+    width: 100%;
     height: 120px;
     border-radius: 5px;
     cursor: pointer;
@@ -195,3 +200,94 @@ button:hover {
 }
 
 
+.presentations-section {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 30%;
+    text-align: center;
+}
+
+.presentations-section h2 {
+    font-size: 1.6rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+#presentation-list {
+    list-style: none;
+    padding: 0;
+}
+
+.presentation-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--neutral-gray);
+    padding: 14px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    width: 100%;
+    transition: background 0.3s ease;
+}
+
+.presentation-item:hover {
+    background: var(--secondary-color);
+}
+
+.presentation-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-grow: 1;
+}
+
+.presentation-info i {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+.presentation-date,
+.presentation-social,
+.presentation-quincena {
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--error-color);
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+.delete-btn:hover {
+    color: #ff1212;
+}
+
+@keyframes slide-left {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slide-right {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

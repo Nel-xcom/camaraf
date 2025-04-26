@@ -11,7 +11,7 @@ class Farmacia(models.Model):
     email_contacto = models.EmailField()
     telefono_contacto = models.CharField(max_length=15)
     cuit = models.CharField(max_length=15)
-    cbu = models.CharField(max_length=15, default="00000000000000000000")
+    cbu = models.CharField(max_length=55, default="000000000000000")
     drogueria = models.CharField(max_length=255)
 
     def __str__(self):
