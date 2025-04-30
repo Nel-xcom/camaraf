@@ -76,20 +76,20 @@ class CargaDatos(models.Model):
     ]
 
     farmacia = models.ForeignKey(Farmacia, on_delete=models.CASCADE)
-    obra_social = models.CharField(max_length=50, choices=OBRAS_SOCIALES)
-    periodo = models.CharField(max_length=20)
-    numero_presentacion = models.CharField(max_length=50, null=True, blank=True)
-    estado = models.CharField(max_length=20, choices=ESTADOS, default='Enviada')
-    cantidad_lotes = models.IntegerField(null=True, blank=True)
-    cantidad_recetas = models.IntegerField(null=True, blank=True)
-    importe_100 = models.DecimalField(max_digits=100, decimal_places=2, null=True, blank=True)
-    importe_a_cargo = models.DecimalField(max_digits=100, decimal_places=2, null=True, blank=True)
-    total_pvp = models.DecimalField(max_digits=100, decimal_places=2, null=True, blank=True)
-    total_pvp_pami = models.DecimalField(max_digits=100, decimal_places=2, null=True, blank=True)
-    importe_bruto_convenio = models.DecimalField(max_digits=100, decimal_places=2, null=True, blank=True)
-    codigo_facaf = models.CharField(max_length=20, null=True, blank=True)
-    codigo_farmalink = models.CharField(max_length=20, null=True, blank=True)
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    obra_social = models.CharField(max_length=50, choices=OBRAS_SOCIALES, blank=False)
+    periodo = models.DateField(max_length=20, blank=False)
+    numero_presentacion = models.CharField(max_length=50, null=True, blank=False)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='Enviada', blank=False)
+    cantidad_lotes = models.IntegerField(null=True, blank=False)
+    cantidad_recetas = models.IntegerField(null=True, blank=False)
+    importe_100 = models.DecimalField(max_digits=100, decimal_places=2, null=True, blank=False)
+    importe_a_cargo = models.DecimalField(max_digits=100, decimal_places=2, null=True, blank=False)
+    total_pvp = models.DecimalField(max_digits=100, decimal_places=2, null=True, blank=False)
+    total_pvp_pami = models.DecimalField(max_digits=100, decimal_places=2, null=True, blank=False)
+    importe_bruto_convenio = models.DecimalField(max_digits=100, decimal_places=2, null=True, blank=False)
+    codigo_facaf = models.CharField(max_length=20, null=True, blank=False)
+    codigo_farmalink = models.CharField(max_length=20, null=True, blank=False)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=False)
 
     def __str__(self):
         return f"{self.obra_social} - {self.periodo}"
@@ -107,13 +107,14 @@ class Presentacion(models.Model):
 
     QUINCENAS = [
         ('1', 'Primera'),
-        ('2', 'Segunda')
+        ('2', 'Segunda'),
+        ('mensual', 'Mensual')
     ]
 
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     fecha = models.DateField()
     obra_social = models.CharField(max_length=50, choices=OBRAS_SOCIALES)
-    quincena = models.CharField(max_length=1, choices=QUINCENAS)
+    quincena = models.CharField(max_length=40, choices=QUINCENAS)
 
     def __str__(self):
         return f"{self.obra_social} - {self.fecha}"

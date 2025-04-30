@@ -40,33 +40,58 @@ document.addEventListener("DOMContentLoaded", function () {
             calendarGrid.appendChild(dayElement);
         }
 
-        loadCalendarData();
+        loadCalendarData(); // Cargar datos de presentaciones
     }
 
     // Event listeners para cambiar de mes
-    prevMonthButton.addEventListener("click", function () {
+    prevMonthButton.addEventListener("click", function() {
         currentDate.setMonth(currentDate.getMonth() - 1);
         updateMonthDisplay();
         generateCalendar();
+        loadCalendarData(); // Forzar recarga de datos
     });
-
-    nextMonthButton.addEventListener("click", function () {
+    
+    nextMonthButton.addEventListener("click", function() {
         currentDate.setMonth(currentDate.getMonth() + 1);
         updateMonthDisplay();
         generateCalendar();
+        loadCalendarData(); // Forzar recarga de datos
     });
 
     // Cargar presentaciones según el mes actual
     function loadCalendarData() {
-        fetch(`/api/get_presentaciones/?year=${currentDate.getFullYear()}&month=${currentDate.getMonth() + 1}`)
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth() + 1;
+        
+        // 1. Actualiza el calendario (tu código existente)
+        fetch(`/api/get_presentaciones/?year=${year}&month=${month}`)
+            .then(response => response.json())
+            .then(data => marcarDiasConPresentaciones(data));
+        
+        // 2. Nueva función para actualizar el listado de presentaciones
+        fetch(`/get_presentaciones_listado/?year=${year}&month=${month}`)
             .then(response => response.json())
             .then(data => {
-                marcarDiasConPresentaciones(data);
-            })
-            .catch(error => console.error("Error al cargar las presentaciones:", error));
+                const listContainer = document.getElementById('presentation-list');
+                listContainer.innerHTML = data.length > 0 
+                    ? data.map(p => `
+                        <li class="presentation-item">
+                            <div class="presentation-info">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span class="presentation-date">${p.fecha}</span>
+                                <span class="presentation-social">${p.obra_social}</span>
+                                <span class="presentation-quincena">Periodo: ${p.quincena}</span>
+                            </div>
+                        </li>
+                    `).join('')
+                    : '<li class="no-presentations">No hay presentaciones este mes</li>';
+            });
     }
 
     function marcarDiasConPresentaciones(presentaciones) {
+        // Limpiar TODOS los tags existentes primero
+        document.querySelectorAll('.evento').forEach(tag => tag.remove());
+        
         presentaciones.forEach(presentacion => {
             const diaElemento = document.querySelector(`.day[data-date="${presentacion.fecha}"]`);
 

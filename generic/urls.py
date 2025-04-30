@@ -35,6 +35,7 @@ urlpatterns = [
     path('usuario/actualizar/', views.actualizar_usuario, name='actualizar_usuario'),
 
     path('calendario/', views.calendario, name="calendario"),
+    path('get_presentaciones_listado/', views.get_presentaciones_listado, name='get_presentaciones_listado'),
     path('calendar/', views.calendar_farmacias, name="calendario_farmacias"),
     path('api/get_presentaciones/', views.get_presentaciones, name="get_presentaciones"),
     path('guardar_presentacion/', views.guardar_presentacion, name="guardar_presentacion"),

@@ -1,3 +1,5 @@
+#------------------------------------------------- crear NUEVA_FUNCIONALIDAD = "CARGA MULTIPLE DE ARCHIVOS DE LIQUIDACION"
+
 # ────────────────────────────────
 # 🧩 Standard Library
 # ────────────────────────────────
@@ -214,22 +216,12 @@ def buscar_usuarios(request):
 
 @login_required
 def actualizar_usuario(request):
-    user = request.user
-    if request.method == 'POST':
-        form = UserUpdateForm(request.POST, instance=user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Tu información se ha actualizado correctamente.")
-            return redirect('actualizar_usuario')
-        else:
-            messages.error(request, "Ocurrió un error al actualizar tu información.")
-    else:
-        form = UserUpdateForm(instance=user)
 
-    return render(request, 'actualizar_usuario.html', {'form': form})
+    return render(request, 'actualizar_usuario.html')
 
 @login_required
 def calendario(request):
+
     # Obtener presentaciones del mes actual
     today = now()
     presentaciones = Presentacion.objects.filter(
@@ -238,25 +230,45 @@ def calendario(request):
 
     return render(request, 'calendario.html', {"presentaciones": presentaciones})
 
+#--Obtener presentaciónes para sincronizar el calendario con el listado
+def get_presentaciones_listado(request):
+    year = int(request.GET.get('year'))
+    month = int(request.GET.get('month'))
+    
+    presentaciones = Presentacion.objects.filter(
+        fecha__year=year,
+        fecha__month=month
+    ).order_by('fecha')
+    
+    # Prepara los datos con el display name de quincena
+    data = []
+    for p in presentaciones:
+        data.append({
+            'fecha': p.fecha.strftime('%d/%m/%Y'),
+            'obra_social': p.obra_social,
+            'quincena': p.get_quincena_display()  # ¡Esto es clave!
+        })
+    
+    return JsonResponse(data, safe=False)
+
 @login_required
 def calendar_farmacias(request):
-    today = now()
-    year, month = today.year, today.month
-
+    # Obtener el mes y año de los parámetros GET o usar el actual
+    year = int(request.GET.get('year', now().year))
+    month = int(request.GET.get('month', now().month))
+    
     presentaciones = Presentacion.objects.filter(
-            fecha__year=today.year, fecha__month=today.month
-        ).order_by('fecha')
+        fecha__year=year, 
+        fecha__month=month
+    ).order_by('fecha')
     
-    # Obtener la cantidad de días del mes actual
     num_dias = calendar.monthrange(year, month)[1]
-    
-    # Generar una lista con todas las fechas del mes
     dias_del_mes = [f"{year}-{month:02d}-{dia:02d}" for dia in range(1, num_dias + 1)]
 
     return render(request, 'calendar_farmacias.html', {
-        "dias_del_mes": dias_del_mes,  # Enviamos la lista de fechas
-        "mes_actual": today.strftime('%Y-%m'),  # Enviamos el mes actual formateado
-        "presentaciones": presentaciones,  # Enviamos las presentaciones del mes actual
+        "dias_del_mes": dias_del_mes,
+        "mes_actual": f"{year}-{month:02d}",
+        "presentaciones": presentaciones,
     })
 
 @login_required
@@ -341,15 +353,20 @@ def resumen_cobro(request):
     chart_data = []
 
     for p in presentaciones:
-        periodo = p.periodo.strip() if p.periodo else ""
-
-        # Convertir periodo de CargaDatos a formato YYYY-MM para comparar con LiquidacionGaleno.fecha
-        if len(periodo) >= 7 and periodo[:4].isdigit() and periodo[-2:].isdigit():
-            year = int(periodo[:4])
-            month = int(periodo[-2:])
-        else:
-            year = None
-            month = None
+        # Manejo seguro del periodo (DateField o CharField)
+        if hasattr(p.periodo, 'strftime'):  # Si es DateField
+            periodo_str = p.periodo.strftime("%Y-%m") if p.periodo else ""
+            year = p.periodo.year if p.periodo else None
+            month = p.periodo.month if p.periodo else None
+        else:  # Si es CharField
+            periodo_str = p.periodo.strip() if p.periodo else ""
+            # Extraer año y mes del string (formato esperado: YYYY-MM o similar)
+            if len(periodo_str) >= 7 and periodo_str[:4].isdigit() and periodo_str[5:7].isdigit():
+                year = int(periodo_str[:4])
+                month = int(periodo_str[5:7])
+            else:
+                year = None
+                month = None
 
         liquidacion = None
         importe_liquidado = 0
@@ -361,16 +378,14 @@ def resumen_cobro(request):
                 fecha__month=month
             ).first()
 
-            # Solo asignar importe_liquidado si el período de CargaDatos coincide con LiquidacionGaleno.fecha
-            if liquidacion and liquidacion.fecha.year == year and liquidacion.fecha.month == month:
-                importe_liquidado = float(liquidacion.importe_liquidado)
+            if liquidacion:
+                importe_liquidado = float(liquidacion.importe_liquidado or 0)
 
         chart_data.append({
             "importe_100": float(p.importe_100 or 0),
-            "importe_liquidado": importe_liquidado
+            "importe_liquidado": importe_liquidado,
+            "periodo": periodo_str  # Para debugging
         })
-
-    print(f"DEBUG: {chart_data}")  # <-- Verificar en consola del servidor si el importe_liquidado es correcto
 
     return render(request, 'resumen_cobro.html', {
         "presentaciones": presentaciones,
