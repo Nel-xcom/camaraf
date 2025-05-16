@@ -1,5 +1,3 @@
-#------------------------------------------------- crear NUEVA_FUNCIONALIDAD = "CARGA MULTIPLE DE ARCHIVOS DE LIQUIDACION"
-
 # ────────────────────────────────
 # 🧩 Standard Library
 # ────────────────────────────────
@@ -172,6 +170,23 @@ def observaciones(request):
         'usuario_asociado': usuario_asociado  # Pasamos el usuario asociado
     })
 
+@csrf_exempt
+@login_required
+def actualizar_estado_presentacion(request, id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        nuevo_estado = data.get("estado")
+
+        try:
+            presentacion = CargaDatos.objects.get(id=id, farmacia=request.user.farmacia)
+            presentacion.estado = nuevo_estado
+            presentacion.save()
+            return JsonResponse({"status": "ok"})
+        except CargaDatos.DoesNotExist:
+            return JsonResponse({"error": "Presentación no encontrada"}, status=404)
+
+    return JsonResponse({"error": "Método no permitido"}, status=405)
+
 
 @login_required
 def lista_usuarios(request):
@@ -338,7 +353,7 @@ def guardar_presentacion(request):
 def eliminar_presentacion(request, presentacion_id):
     if request.method == 'DELETE':
         try:
-            presentacion = Presentacion.objects.get(id=presentacion_id, usuario=request.user)
+            presentacion = CargaDatos.objects.get(id=presentacion_id, farmacia=request.user.farmacia)
             presentacion.delete()
             return JsonResponse({'message': 'Presentación eliminada correctamente'}, status=200)
         except CargaDatos.DoesNotExist:
@@ -382,7 +397,7 @@ def resumen_cobro(request):
                 importe_liquidado = float(liquidacion.importe_liquidado or 0)
 
         chart_data.append({
-            "importe_100": float(p.importe_100 or 0),
+            "importe_100": float(p.total_pvp_pami if p.obra_social.upper() == "PAMI" else (p.importe_100 or 0)),
             "importe_liquidado": importe_liquidado,
             "periodo": periodo_str  # Para debugging
         })
@@ -435,13 +450,12 @@ def eliminar_liquidacion_galeno(request):
 
     return JsonResponse({"status": "error"}, status=400)
 
-
 def cargar_liquidacion_pami(request):
     if request.method == "POST":
         form = LiquidacionPAMIForm(request.POST, request.FILES)
         if form.is_valid():
             archivo_xlsx = request.FILES["archivo"]
-            archivo_origen = 'lq_' + datetime.now().strftime('%d%m%y_%H%M%S%f')  
+            archivo_origen = "LQ: " + date.today().strftime("%d-%m-%Y")
             registros_creados = procesar_liquidacion_pami(archivo_xlsx, archivo_origen)
             messages.success(request, f"Se cargaron {registros_creados} registros correctamente.")
             return redirect("cargar_liquidacion_pami")
@@ -456,6 +470,33 @@ def cargar_liquidacion_pami(request):
     )
 
     return render(request, "liquidacion_pami.html", {"form": form, "liquidaciones": liquidaciones, "archivos_disponibles": archivos_disponibles})
+
+@csrf_exempt
+@login_required
+def editar_titulo_liquidacion(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        archivo_origen = data.get("archivo_origen")
+        nuevo_titulo = data.get("nuevo_titulo")
+
+        if archivo_origen and nuevo_titulo:
+            LiquidacionPAMI.objects.filter(archivo_origen=archivo_origen).update(archivo_origen=nuevo_titulo)
+            LiquidacionPAMIOncologico.objects.filter(archivo_origen=archivo_origen).update(archivo_origen=nuevo_titulo)
+            LiquidacionPAMIPanales.objects.filter(archivo_origen=archivo_origen).update(archivo_origen=nuevo_titulo)
+            LiquidacionPAMIVacunas.objects.filter(archivo_origen=archivo_origen).update(archivo_origen=nuevo_titulo)
+            LiquidacionJerarquicos.objects.filter(archivo_origen=archivo_origen).update(archivo_origen=nuevo_titulo)
+            LiquidacionGaleno.objects.filter(archivo_origen=archivo_origen).update(archivo_origen=nuevo_titulo)
+            LiquidacionOspil.objects.filter(archivo_origen=archivo_origen).update(archivo_origen=nuevo_titulo)
+            LiquidacionOsfatlyf.objects.filter(archivo_origen=archivo_origen).update(archivo_origen=nuevo_titulo)
+            LiquidacionAndinaART.objects.filter(archivo_origen=archivo_origen).update(archivo_origen=nuevo_titulo)  
+            LiquidacionAsociart.objects.filter(archivo_origen=archivo_origen).update(archivo_origen=nuevo_titulo)
+            LiquidacionColoniaSuiza.objects.filter(archivo_origen=archivo_origen).update(archivo_origen=nuevo_titulo)
+            LiquidacionExperta.objects.filter(archivo_origen=archivo_origen).update(archivo_origen=nuevo_titulo)
+            LiquidacionGalenoART.objects.filter(archivo_origen=archivo_origen).update(archivo_origen=nuevo_titulo)
+            LiquidacionPrevencionART.objects.filter(archivo_origen=archivo_origen).update(archivo_origen=nuevo_titulo)
+            return JsonResponse({"status": "ok"})
+
+    return JsonResponse({"status": "error"}, status=400)
 
 @csrf_exempt
 @login_required
@@ -476,7 +517,7 @@ def cargar_liquidacion_jerarquicos(request):
         form = LiquidacionJerarquicosForm(request.POST, request.FILES)
         if form.is_valid():
             archivo_xlsx = request.FILES["archivo"]
-            archivo_origen = 'lq_' + datetime.now().strftime('%d%m%y_%H%M%S%f')  # ✅ Identificador único
+            archivo_origen = "LQ: " + date.today().strftime("%d-%m-%Y")
             registros_creados = procesar_liquidacion_jerarquicos(archivo_xlsx, archivo_origen)
             messages.success(request, f"Se cargaron {registros_creados} registros correctamente.")
             return redirect("cargar_liquidacion_jerarquicos")

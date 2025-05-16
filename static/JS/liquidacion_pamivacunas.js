@@ -58,3 +58,49 @@ document.addEventListener('DOMContentLoaded', () => {
     return cookieValue;
   }
   
+
+    document.querySelectorAll('.editar-btn').forEach(btn => {
+    btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const fileCard = this.closest('.file-card');
+        const fileNameSpan = fileCard.querySelector('.file-name');
+        const input = fileCard.querySelector('.edit-input');
+
+        input.style.display = 'inline-block';
+        fileNameSpan.style.display = 'none';
+        input.focus();
+
+        // Guardar al presionar Enter
+        input.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                const nuevoNombre = input.value.trim();
+                const archivoOriginal = fileCard.dataset.archivo;
+
+                if (nuevoNombre && nuevoNombre !== archivoOriginal) {
+                    fetch('/editar-titulo-liquidacion/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCSRFToken(),
+                        },
+                        body: JSON.stringify({
+                            archivo_origen: archivoOriginal,
+                            nuevo_titulo: nuevoNombre,
+                        }),
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();  // Recargamos para ver el nuevo título
+                        } else {
+                            alert('❌ Error al editar el título.');
+                        }
+                    });
+                }
+
+                // Ocultar input y mostrar texto original
+                input.style.display = 'none';
+                fileNameSpan.style.display = 'inline';
+            }
+        });
+    });
+});

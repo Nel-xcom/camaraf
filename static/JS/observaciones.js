@@ -42,3 +42,56 @@ document.addEventListener('DOMContentLoaded', function() {
         return cookieValue;
     }
 });
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".editable-estado").forEach(cell => {
+        const span = cell.querySelector(".estado-label");
+        const select = cell.querySelector(".estado-select");
+        const presentacionId = cell.dataset.id;
+
+        // Mostrar <select> al hacer clic
+        span.addEventListener("click", () => {
+            span.style.display = "none";
+            select.style.display = "inline-block";
+            select.focus();
+        });
+
+        // Guardar al presionar Enter
+        select.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                const nuevoEstado = select.value;
+
+                fetch(`/actualizar_estado_presentacion/${presentacionId}/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCSRFToken()
+                    },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error("Error al actualizar estado");
+                    return res.json();
+                })
+                .then(() => {
+                    // ✅ Reemplazar el contenido con nuevo estado
+                    span.innerHTML = `<i class="fas fa-circle icon-estado"></i> ${nuevoEstado}`;
+                    span.style.display = "inline-block";
+                    select.style.display = "none";
+                })
+                .catch(err => console.error("Error en actualización:", err));
+            }
+        });
+    });
+
+    function getCSRFToken() {
+        const cookie = document.cookie
+            .split("; ")
+            .find(row => row.startsWith("csrftoken="));
+        return cookie ? cookie.split("=")[1] : "";
+    }
+});
+
+

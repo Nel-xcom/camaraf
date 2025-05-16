@@ -29,6 +29,7 @@ urlpatterns = [
     path('cargar-datos/<str:obra_social>/', views.cargar_datos, name='cargar_datos'),
     path('presentacion_exitosa/<int:carga_datos_id>/', views.presentacion_exitosa, name='presentacion_exitosa'),
     path('observaciones/', views.observaciones, name='observaciones'),
+    path('actualizar_estado_presentacion/<int:id>/', views.actualizar_estado_presentacion, name='actualizar_estado_presentacion'),
 
     path('usuarios/', views.lista_usuarios, name='lista_usuarios'),
     path('buscar_usuarios/', views.buscar_usuarios, name='buscar_usuarios'),
@@ -47,6 +48,7 @@ urlpatterns = [
     path("cargar-liquidacion-galeno/", views.cargar_liquidacion_galeno, name="cargar_liquidacion_galeno"),
     path("eliminar-liquidacion-galeno/", views.eliminar_liquidacion_galeno, name="eliminar_liquidacion_galeno"),
     path("cargar-liquidacion-pami/", views.cargar_liquidacion_pami, name="cargar_liquidacion_pami"),
+    path("editar-titulo-liquidacion/", views.editar_titulo_liquidacion, name="editar_titulo_liquidacion"),
     path("eliminar-liquidacion/", views.eliminar_liquidacion_pami, name="eliminar_liquidacion_pami"),
     path("cargar-liquidacion-pami-oncologico/", views.cargar_liquidacion_pami_oncologico, name="cargar_liquidacion_pami_oncologico"),
     path("eliminar-liquidacion-pami-oncologico/", views.eliminar_liquidacion_pami_oncologico, name="eliminar_liquidacion_pami_oncologico"),

@@ -48,6 +48,7 @@
                         <span class="file-name" title="{{ archivo }}">
                             {{ archivo }}
                         </span>
+                        <input type="text" class="edit-input" style="display: none;" value="{{ archivo }}">
                     </div>
                     <div class="file-preview"></div>
                     <i class="fas fa-ellipsis-v file-options"></i>
@@ -55,6 +56,7 @@
                     <!-- Menú contextual -->
                     <div class="context-menu">
                         <div class="menu-item"><i class="fas fa-download"></i> Descargar</div>
+                        <div class="menu-item editar-btn"><i class="fas fa-pen"></i> Editar título</div>
                         <div class="menu-item eliminar-btn"><i class="fas fa-trash"></i> Eliminar</div>
                     </div>
                 </div>

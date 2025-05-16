@@ -129,7 +129,7 @@ class Liquidacion(models.Model):
     total_pvp = models.DecimalField(max_digits=10, decimal_places=2)
     fecha_carga = models.DateTimeField(auto_now_add=True)
 
-    archivo_origen = models.CharField(max_length=20, null=True, blank=True)
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return f"{self.obra_social} - {self.periodo}"
@@ -146,7 +146,7 @@ class LiquidacionGaleno(models.Model):
 
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_galeno')
 
-    archivo_origen = models.CharField(max_length=20, null=True, blank=True)
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
 
 
     def __str__(self):
@@ -171,7 +171,7 @@ class LiquidacionPAMI(models.Model):
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
-    archivo_origen = models.CharField(max_length=20, null=True, blank=True)
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         verbose_name = "Liquidación PAMI"
@@ -199,7 +199,7 @@ class LiquidacionJerarquicos(models.Model):
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
-    archivo_origen = models.CharField(max_length=20, null=True, blank=True)
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         verbose_name = "Liquidación Jerárquicos"
@@ -226,7 +226,7 @@ class LiquidacionOspil(models.Model):
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
-    archivo_origen = models.CharField(max_length=20, null=True, blank=True)
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return f"{self.farmacia} - {self.fecha_liquidacion} - {self.subtotal_pagar}"
@@ -245,7 +245,7 @@ class LiquidacionOsfatlyf(models.Model):
 
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_osfatlyf')
 
-    archivo_origen = models.CharField(max_length=20, null=True, blank=True)
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
@@ -271,7 +271,7 @@ class LiquidacionPAMIOncologico(models.Model):
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
-    archivo_origen = models.CharField(max_length=20, null=True, blank=True)
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         verbose_name = "Liquidación PAMI Oncológico"
@@ -299,7 +299,7 @@ class LiquidacionPAMIPanales(models.Model):
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
-    archivo_origen = models.CharField(max_length=20, null=True, blank=True)
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         verbose_name = "Liquidación PAMI Pañales"
@@ -323,7 +323,7 @@ class LiquidacionPAMIVacunas(models.Model):
 
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_pami_vacunas')
 
-    archivo_origen = models.CharField(max_length=20, null=True, blank=True)
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
@@ -348,7 +348,7 @@ class LiquidacionAndinaART(models.Model):
 
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
-    archivo_origen = models.CharField(max_length=20, null=True, blank=True)
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         verbose_name = "Liquidación Andina ART"
@@ -376,7 +376,7 @@ class LiquidacionAsociart(models.Model):
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
-    archivo_origen = models.CharField(max_length=20, null=True, blank=True)
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         verbose_name = "Liquidación Asociart"
@@ -402,7 +402,7 @@ class LiquidacionColoniaSuiza(models.Model):
 
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
-    archivo_origen = models.CharField(max_length=20, null=True, blank=True)
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         verbose_name = "Liquidación Colonia Suiza"
@@ -426,7 +426,7 @@ class LiquidacionExperta(models.Model):
 
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_experta')
 
-    archivo_origen = models.CharField(max_length=20, null=True, blank=True)
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
@@ -452,7 +452,7 @@ class LiquidacionGalenoART(models.Model):
 
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_galenoart')
 
-    archivo_origen = models.CharField(max_length=20, null=True, blank=True)
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
@@ -482,7 +482,7 @@ class LiquidacionPrevencionART(models.Model):
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
-    archivo_origen = models.CharField(max_length=20, null=True, blank=True)
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         verbose_name = "Liquidación Prevención ART"

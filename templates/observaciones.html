@@ -56,9 +56,16 @@
                     <td>{{ presentacion.numero_presentacion }}</td>
                     <td>{{ presentacion.periodo }}</td>
                     <td>{{ presentacion.obra_social }}</td>
-                    <td class="estado {{ presentacion.estado|lower }}">
-                        <i class="fas fa-circle icon-estado"></i> {{ presentacion.estado }}
+                    <td class="estado editable-estado" data-id="{{ presentacion.id }}">
+                        <span class="estado-label"><i class="fas fa-circle icon-estado"></i> {{ presentacion.estado }}</span>
+                        <select class="estado-select" style="display: none;">
+                            {% for valor, display in presentacion.ESTADOS %}
+                                <option value="{{ valor }}" {% if valor == presentacion.estado %}selected{% endif %}>{{ display }}</option>
+                            {% endfor %}
+                        </select>
                     </td>
+
+
                     <td>
                         <button class="delete-btn" data-id="{{ presentacion.id }}" title="Eliminar presentación">
                             <i class="fas fa-trash-alt" style="color: red; cursor: pointer;"></i>
