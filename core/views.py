@@ -738,6 +738,10 @@ def eliminar_liquidacion_pami_vacunas(request):
 
     return JsonResponse({"status": "error"}, status=400)
 
+@login_required
+def cargar_liquidacion_pami_nutricional(request):
+
+    return render(request, "liquidacion_pami_nutricional.html")
 
 @login_required
 def cargar_liquidacion_andina_art(request):
@@ -968,6 +972,6 @@ def panel_liquidaciones(request):
     """
     Vista que muestra el panel de análisis de liquidaciones.
     """
-    datos_panel = obtener_datos_panel()
+    
 
-    return render(request, "panel_liquidaciones.html", {"datos_panel": datos_panel})
+    return render(request, "panel_liquidaciones.html")

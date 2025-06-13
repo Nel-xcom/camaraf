@@ -51,11 +51,11 @@ def procesar_liquidacion_ospil(archivo_xlsx, archivo_origen):
         plan = "OSPIL"  # Fijo
         fecha_liquidacion = now().date()
 
-        importe_100 = float(row[4]) if not pd.isna(row[4]) else 0.00
-        a_cargo_os = float(row[5]) if not pd.isna(row[5]) else 0.00
-        bonificacion = float(row[11]) if not pd.isna(row[11]) else 0.00
-        nota_credito = float(row[12]) if not pd.isna(row[12]) else 0.00
-        subtotal_pagar = float(row[17]) if not pd.isna(row[17]) else 0.00
+        importe_100 = float(row[10]) if not pd.isna(row[10]) else 0.00
+        a_cargo_os = float(row[11]) if not pd.isna(row[11]) else 0.00
+        bonificacion = float(row[12]) if not pd.isna(row[12]) else 0.00
+        nota_credito = float(row[13]) if not pd.isna(row[13]) else 0.00
+        subtotal_pagar = float(row[18]) if not pd.isna(row[18]) else 0.00
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 
@@ -108,7 +108,7 @@ def procesar_liquidacion_pami(archivo_xlsx, archivo_origen):
         a_cargo_os = float(row[15]) if not pd.isna(row[15]) else 0.00
         bonificacion = float(row[16]) if not pd.isna(row[16]) else 0.00
         nota_credito = float(row[17]) if not pd.isna(row[17]) else 0.00
-        subtotal_pagar = float(row[23]) if not pd.isna(row[23]) else 0.00
+        subtotal_pagar = float(row[22]) if not pd.isna(row[22]) else 0.00
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 
@@ -128,7 +128,7 @@ def procesar_liquidacion_pami(archivo_xlsx, archivo_origen):
             nota_credito=nota_credito,
             subtotal_pagar=subtotal_pagar,
             archivo_origen=archivo_origen,
-            user=usuario  # 👈 Esta es la línea clave que faltaba
+            user=usuario  
         )
 
 
@@ -203,11 +203,11 @@ def procesar_liquidacion_pami_panales(archivo_xlsx, archivo_origen):
         codigo_farmacia = str(row[0]).strip()
         nombre_farmacia = str(row[2]).strip()
 
-        importe_100 = float(row[9]) if not pd.isna(row[9]) else 0.00
-        a_cargo_os = float(row[10]) if not pd.isna(row[10]) else 0.00
-        bonificacion = float(row[11]) if not pd.isna(row[11]) else 0.00
-        nota_credito = float(row[12]) if not pd.isna(row[12]) else 0.00
-        subtotal_pagar = float(row[17]) if not pd.isna(row[17]) else 0.00
+        importe_100 = float(row[10]) if not pd.isna(row[10]) else 0.00
+        a_cargo_os = float(row[11]) if not pd.isna(row[11]) else 0.00
+        bonificacion = float(row[12]) if not pd.isna(row[12]) else 0.00
+        nota_credito = float(row[13]) if not pd.isna(row[13]) else 0.00
+        subtotal_pagar = float(row[19]) if not pd.isna(row[19]) else 0.00
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 
@@ -297,11 +297,11 @@ def procesar_liquidacion_jerarquicos(archivo_xlsx, archivo_origen):
         nombre_farmacia = str(row[2]).strip()
         plan = str(row[3]).strip()
 
-        importe_100 = float(row[4]) if not pd.isna(row[4]) else 0.00
-        a_cargo_os = float(row[5]) if not pd.isna(row[5]) else 0.00
-        bonificacion = float(row[11]) if not pd.isna(row[11]) else 0.00
-        nota_credito = float(row[12]) if not pd.isna(row[12]) else 0.00
-        subtotal_pagar = float(row[17]) if not pd.isna(row[17]) else 0.00
+        importe_100 = float(row[10]) if not pd.isna(row[10]) else 0.00
+        a_cargo_os = float(row[11]) if not pd.isna(row[11]) else 0.00
+        bonificacion = float(row[12]) if not pd.isna(row[12]) else 0.00
+        nota_credito = float(row[13]) if not pd.isna(row[13]) else 0.00
+        subtotal_pagar = float(row[18]) if not pd.isna(row[18]) else 0.00
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 
@@ -437,7 +437,7 @@ def procesar_liquidacion_asociart(archivo_xlsx, archivo_origen):
         a_cargo_os = float(row[10]) if not pd.isna(row[10]) else 0.00
         bonificacion = float(row[11]) if not pd.isna(row[11]) else 0.00
         nota_credito = float(row[12]) if not pd.isna(row[12]) else 0.00
-        subtotal_pagar = float(row[17]) if not pd.isna(row[17]) else 0.00
+        subtotal_pagar = float(row[18]) if not pd.isna(row[18]) else 0.00
 
         farmacia, _ = Farmacia.objects.get_or_create(nombre=nombre_farmacia)
 

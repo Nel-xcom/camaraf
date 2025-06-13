@@ -28,7 +28,6 @@ class User(AbstractUser):
         max_length=20,
         null=True,
         blank=True,
-        help_text="ID único provisto por FACAF para identificación cruzada"
     )
 
     groups = models.ManyToManyField(
@@ -69,17 +68,17 @@ class CargaDatos(models.Model):
     ]
 
     ESTADOS = [
-        ('Enviada', 'Enviada'),
-        ('Recibida', 'Recibida'),
-        ('Presentada', 'Presentada'),
+        ('Enviado', 'Enviado'),
+        ('Recibida en Cámara', 'Recibido en Cámara'),
+        ('Presentado en obra social', 'Presentado en obra social'),
         ('Liquidada', 'Liquidada')
     ]
 
     farmacia = models.ForeignKey(Farmacia, on_delete=models.CASCADE)
     obra_social = models.CharField(max_length=50, choices=OBRAS_SOCIALES, blank=False)
-    periodo = models.DateField(max_length=20, blank=False)
+    periodo = models.CharField(max_length=50, blank=False, default="none")
     numero_presentacion = models.CharField(max_length=50, null=True, blank=False)
-    estado = models.CharField(max_length=20, choices=ESTADOS, default='Enviada', blank=False)
+    estado = models.CharField(max_length=100, choices=ESTADOS, default='Enviada', blank=False)
     cantidad_lotes = models.IntegerField(null=True, blank=False)
     cantidad_recetas = models.IntegerField(null=True, blank=False)
     importe_100 = models.DecimalField(max_digits=100, decimal_places=2, null=True, blank=False)

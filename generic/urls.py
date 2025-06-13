@@ -56,6 +56,7 @@ urlpatterns = [
     path("eliminar-liquidacion-pami-panales/", views.eliminar_liquidacion_pami_panales, name="eliminar_liquidacion_pami_panales"),
     path("cargar-liquidacion-pami-vacunas/", views.cargar_liquidacion_pami_vacunas, name="cargar_liquidacion_pami_vacunas"),
     path("eliminar-liquidacion-pami-vacunas/", views.eliminar_liquidacion_pami_vacunas, name="eliminar_liquidacion_pami_vacunas"),
+    path("cargar-liquidacion-pami-nutricional/", views.cargar_liquidacion_pami_nutricional, name="cargar_liquidacion_pami_nutricional"),
     path("cargar-liquidacion-jerarquicos/", views.cargar_liquidacion_jerarquicos, name="cargar_liquidacion_jerarquicos"),
     path("eliminar-liquidacion-jerarquicos/", views.eliminar_liquidacion_jerarquicos, name="eliminar_liquidacion_jerarquicos"),
     path('cargar-liquidacion-ospil/', views.cargar_liquidacion_ospil, name='cargar_liquidacion_ospil'),

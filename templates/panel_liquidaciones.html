@@ -2,102 +2,137 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control de Pagos</title>
-    <link rel="stylesheet" href="{% static 'css/panel-liquidacion.css' %}">
-    <link rel="shortcut icon" href="/static/images/escudo-chubut.png" />
-    <script defer src="{% static 'js/panel_liquidacion.js' %}"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Analítico - Cámara de Farmacias</title>
+  <link rel="stylesheet" href="{% static 'css/panel-liquidacion.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    {% include 'header.html' %}
-    
-    <div class="container">
-        <div class="content-wrapper">
-            <h2 class="panel-title">Panel de Control de Pagos</h2>
-            
-            <div class="panel-container">
-                {% for obra_social, total in datos_panel.totales_por_obra.items %}
-                <div class="panel-card total-obra">
-                    <h3><i class="fas fa-file-invoice-dollar"></i> {{ obra_social }}</h3>
-                    <p class="amount">${{ total|floatformat:2 }}</p>
-                </div>
-                {% endfor %}
-            </div>
+  {% include 'header.html' %}
 
-            <div class="chart-section">
-                <div class="chart-container">
-                    <h3>Comparación de Liquidaciones</h3>
-                    <canvas id="comparacionLiquidaciones"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h3>Evolución de Pagos por Mes</h3>
-                    <canvas id="evolucionPagos"></canvas>
-                </div>
-            </div>
-        </div>
+  <div class="dashboard-container">
+
+    <!-- Filtros -->
+    <div class="filter-bar">
+      <h4>Filtros: </h4>
+      <select id="year-filter">
+        <option selected>2025</option>
+        <option>2024</option>
+      </select>
+      <select id="month-filter">
+        <option selected>May</option>
+        <option>Abr</option>
+        <option>Mar</option>
+      </select>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // ✅ PASO 1: Convertir datos de Django en JSON SEGURO
-            const comparacionLiquidaciones = {{ datos_panel.comparacion_liquidaciones|safe }};
-            const evolucionPagos = {{ datos_panel.evolucion_pagos|safe }};
-    
-            // ✅ PASO 2: Asegurar que los datos existen antes de generar gráficos
-            if (Object.keys(comparacionLiquidaciones).length === 0 || Object.keys(evolucionPagos).length === 0) {
-                console.error("No hay datos suficientes para mostrar los gráficos.");
-                return;
-            }
-    
-            // ✅ PASO 3: Generar gráfico de barras para comparación de liquidaciones
-            const ctx1 = document.getElementById('comparacionLiquidaciones').getContext('2d');
-            new Chart(ctx1, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(comparacionLiquidaciones),
-                    datasets: [{
-                        label: "Importe Liquidado",
-                        data: Object.values(comparacionLiquidaciones),
-                        backgroundColor: ['#2ECC71', '#FF6B6B', '#F4D03F'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-    
-            // ✅ PASO 4: Generar gráfico de barras para evolución de pagos
-            const ctx2 = document.getElementById('evolucionPagos').getContext('2d');
-            new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(evolucionPagos),
-                    datasets: [{
-                        label: "Evolución de Pagos",
-                        data: Object.values(evolucionPagos),
-                        backgroundColor: '#4070B7',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-    
-        });
-    </script>        
-    
+    <!-- Indicadores principales -->
+    <div class="main-metrics">
+      <div class="metric-card">
+        <h3>Total Transferido (Farmacias)</h3>
+        <p>$34.321.450</p>
+      </div>
+      <div class="metric-card">
+        <h3>Total Transferido (Sociedades)</h3>
+        <p>$55.786.320</p>
+      </div>
+      <div class="metric-card">
+        <h3>Ingresos Totales (Comisiones)</h3>
+        <p>$2.310.700</p>
+      </div>
+      <div class="metric-card">
+        <h3>% Transferencia Bancaria</h3>
+        <p>63.4%</p>
+      </div>
+      <div class="metric-card">
+        <h3>% Crédito Droguería</h3>
+        <p>36.6%</p>
+      </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="charts-row">
+      <div class="chart-card card1">
+        <h3>Ingresos por Obra Social</h3>
+        <canvas id="chart-ingresos"></canvas>
+      </div>
+      <div class="chart-card card2">
+        <h3>Formas de pago</h3>
+        <canvas id="chart-liquidez"></canvas>
+      </div>
+    </div>
+
+    <!-- Mejores OS -->
+    <div class="highlight-cards">
+      <div class="highlight-card">
+        <h3>Mayor Monto por Transacción</h3>
+        <p>PAMI</p>
+        <span>$14.221.300</span>
+      </div>
+      <div class="highlight-card">
+        <h3>Menor Porcentaje de Descuento</h3>
+        <p>OSDIPP</p>
+        <span>2.3%</span>
+      </div>
+      <div class="highlight-card">
+        <h3>Mejor Cumplimiento de Pago</h3>
+        <p>Galeno ART</p>
+        <span>98.7%</span>
+      </div>
+    </div>
+
+    <!-- Evolución -->
+    <div class="evolution-table">
+      <h4>Evolución de Cobros</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Mes Actual</th>
+            <th>Mes Anterior</th>
+            <th>Últimos 6 meses</th>
+            <th>Year to Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>$2.310.700</td>
+            <td>$1.980.430</td>
+            <td>$10.342.000</td>
+            <td>$15.943.860</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    new Chart(document.getElementById('chart-ingresos'), {
+      type: 'bar',
+      data: {
+        labels: ['PAMI', 'OSDIPP', 'Galeno', 'OSFATLYF', 'Jerárquicos', 'OSPIL AMPIL', 'ANDINA'],
+        datasets: [{
+          label: 'Ingresos ($)',
+          data: [14221300, 532000, 420000, 690000, 320000],
+          backgroundColor: '#8cc0e8'
+        }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+
+    new Chart(document.getElementById('chart-liquidez'), {
+      type: 'pie',
+      data: {
+        labels: ['Transferencia Bancaria', 'Crédito Droguería'],
+        datasets: [{
+          data: [63.4, 36.6],
+          backgroundColor: ['#8cc0e8', '#4070b7']
+        }]
+      },
+      options: {
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+  </script>
 </body>
 </html>
