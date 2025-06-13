@@ -761,7 +761,7 @@ def obtener_transferencias_por_sociedad():
             if nombre_obra in ["PAMI Oncológico", "PAMI Vacunas", "PAMI Pañales"]:
                 item["comision"] = 0
             else:
-                item["comision"] = round(item["importe_total"] * 0.0075, 2)
+                item["comision"] = round(item["importe_total"] * 0.0060, 2)
             item["total_transferir"] = round(item["importe_total"] - item["comision"], 2)
 
 
