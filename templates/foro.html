@@ -1,0 +1,288 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foro - Camara de Farmacias de la provincia de Chubut</title>
+    <link rel="stylesheet" href="{% static 'css/foro.css' %}">
+    <link rel="shortcut icon" href="/static/images/escudo-chubut.png" />
+    <script defer src="{% static 'js/foro.js' %}"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <main class="foro-wrapper">
+        <div class="foro-layout">
+            <!-- Contenedor principal: Publicar y Publicaciones -->
+            <div class="main-content">
+                <!-- Sección para publicar -->
+                <section class="post-section">
+                    <div class="post-header">
+                        <div class="user-avatar">
+                            <img src="/static/images/userProfile.jpg" alt="Usuario" class="avatar-img">
+                        </div>
+                        <div class="post-form">
+                            <form id="publication-form" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <textarea class="post-input" name="descripcion" placeholder="¿Qué está pasando en la comunidad farmacéutica?" required></textarea>
+                                
+                                <div class="post-options">
+                                    <div class="category-select">
+                                        <select class="category-dropdown" name="categoria" required>
+                                            <option value="">Seleccionar categoría</option>
+                                            <option value="obra-social">Obra social</option>
+                                            <option value="anuncio">Anuncio</option>
+                                            <option value="recordatorio">Recordatorio</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="file-inputs">
+                                        <label class="file-input-label">
+                                            <i class="fas fa-image"></i>
+                                            <input type="file" name="imagen" class="file-input" accept="image/*" hidden>
+                                            <span>Imagen</span>
+                                        </label>
+                                        
+                                        <label class="file-input-label">
+                                            <i class="fas fa-file"></i>
+                                            <input type="file" name="archivo" class="file-input" accept=".pdf,.doc,.docx,.xls,.xlsx" hidden>
+                                            <span>Archivo</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="post-actions">
+                                    <div class="selected-files">
+                                        <!-- Archivos seleccionados se mostrarán aquí -->
+                                    </div>
+                                    <button type="submit" class="post-btn">Publicar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sección de publicaciones -->
+                <section class="publications-section">
+                    <h2 class="section-title">Publicaciones Recientes</h2>
+                    
+                    <div class="publications-list">
+                        {% for publicacion in publicaciones %}
+                        <article class="publication-item" data-publication-id="{{ publicacion.id }}">
+                            <div class="publication-header">
+                                <div class="user-info">
+                                    <img src="/static/images/userProfile.jpg" alt="Usuario" class="avatar-img">
+                                    <div class="user-details">
+                                        <span class="user-name">{{ publicacion.usuario_creacion.get_full_name|default:publicacion.usuario_creacion.username }}</span>
+                                        <span class="publication-time">· {{ publicacion.get_tiempo_transcurrido }}</span>
+                                    </div>
+                                </div>
+                                <div class="publication-actions">
+                                    <span class="category-badge {{ publicacion.categoria }}">{{ publicacion.get_categoria_display }}</span>
+                                    {% if publicacion.usuario_creacion == request.user %}
+                                    <button class="delete-btn" title="Eliminar publicación" onclick="eliminarPublicacion({{ publicacion.id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="publication-content">
+                                <p class="publication-text">{{ publicacion.descripcion }}</p>
+                                
+                                {% if publicacion.imagen or publicacion.archivo %}
+                                <div class="publication-attachments">
+                                    {% if publicacion.imagen %}
+                                    <div class="attachment-image">
+                                        <img src="{{ publicacion.imagen.url }}" alt="Imagen adjunta" class="attachment-img">
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if publicacion.archivo %}
+                                    <div class="attachment-file">
+                                        <a href="{{ publicacion.archivo.url }}" class="file-download-btn" download>
+                                            <i class="fas fa-file"></i>
+                                            <span class="file-name">{{ publicacion.archivo.name|slice:"21:" }}</span>
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Botones de interacción -->
+                                <div class="publication-interactions">
+                                    <button class="interaction-btn comment-btn" onclick="mostrarComentarios({{ publicacion.id }})">
+                                        <i class="far fa-comment"></i>
+                                        <span class="interaction-count">{{ publicacion.comentarios_count }}</span>
+                                    </button>
+                                    <button class="interaction-btn like-btn {% if publicacion.user_has_liked %}liked{% endif %}" 
+                                            onclick="toggleLike({{ publicacion.id }})">
+                                        <i class="{% if publicacion.user_has_liked %}fas{% else %}far{% endif %} fa-heart"></i>
+                                        <span class="interaction-count">{{ publicacion.likes_count }}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                        {% empty %}
+                        <div class="no-publications">
+                            <p>No hay publicaciones aún. ¡Sé el primero en compartir algo!</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+            </div>
+
+            <!-- Aside: Contenedor de Reclamos -->
+            <aside class="complaints-container">
+                <div class="complaints-header">
+                    <h2 class="complaints-title">Reclamos</h2>
+                    <button class="new-complaint-btn" onclick="abrirModalReclamo()">
+                        <i class="fas fa-plus"></i>
+                        Nueva solicitud
+                    </button>
+                </div>
+                <div class="complaints-list" id="complaints-list">
+                    <!-- Reclamos dinámicos -->
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- Modal de comentarios -->
+    <div id="comment-modal" class="comment-modal" style="display:none;">
+        <div class="comment-modal-backdrop" onclick="closeCommentModal()"></div>
+        <div class="comment-modal-content">
+            <button class="comment-modal-close" onclick="closeCommentModal()" title="Cerrar">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="comment-modal-publication">
+                <div class="modal-user-info">
+                    <img src="/static/images/userProfile.jpg" alt="Usuario" class="avatar-img modal-avatar">
+                    <div class="modal-user-details">
+                        <span class="modal-user-name" id="modal-user-name"></span>
+                        <span class="modal-publication-time" id="modal-publication-time"></span>
+                    </div>
+                </div>
+                <div class="modal-publication-description" id="modal-publication-description"></div>
+                <div class="modal-publication-image" id="modal-publication-image"></div>
+            </div>
+            <div id="modal-comments-list" class="modal-comments-list"></div>
+            <form id="modal-comment-form" enctype="multipart/form-data" class="modal-comment-form">
+                {% csrf_token %}
+                <textarea name="contenido" id="modal-comment-input" class="modal-comment-input" placeholder="Escribe tu respuesta..." required></textarea>
+                <div class="modal-comment-files">
+                    <label class="file-input-label">
+                        <i class="fas fa-image"></i>
+                        <input type="file" name="imagen" class="file-input" accept="image/*" hidden>
+                        <span>Imagen</span>
+                    </label>
+                    <label class="file-input-label">
+                        <i class="fas fa-file"></i>
+                        <input type="file" name="archivo" class="file-input" accept=".pdf,.doc,.docx,.xls,.xlsx" hidden>
+                        <span>Archivo</span>
+                    </label>
+                </div>
+                <div class="modal-comment-actions">
+                    <button type="submit" class="post-btn">Responder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de creación de reclamo -->
+    <div id="reclamo-modal" class="comment-modal" style="display:none;">
+        <div class="comment-modal-backdrop" onclick="cerrarModalReclamo()"></div>
+        <div class="comment-modal-content">
+            <button class="comment-modal-close" onclick="cerrarModalReclamo()" title="Cerrar">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 style="margin-bottom:18px;">Nuevo Reclamo</h2>
+            <form id="reclamo-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="text" name="titulo" class="modal-comment-input" placeholder="Título del reclamo" required style="margin-bottom:10px;">
+                <textarea name="descripcion" class="modal-comment-input" placeholder="Describe el problema o solicitud..." required></textarea>
+                <div class="modal-comment-files">
+                    <label class="file-input-label">
+                        <i class="fas fa-image"></i>
+                        <input type="file" name="imagen" class="file-input" accept="image/*" hidden>
+                        <span>Imagen</span>
+                    </label>
+                    <label class="file-input-label">
+                        <i class="fas fa-file"></i>
+                        <input type="file" name="archivo" class="file-input" accept=".pdf,.doc,.docx,.xls,.xlsx" hidden>
+                        <span>Archivo</span>
+                    </label>
+                </div>
+                <div class="modal-comment-actions">
+                    <button type="submit" class="post-btn">Enviar reclamo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de reclamo interactivo -->
+    <div id="complaint-modal" class="comment-modal complaint-x-modal" style="display:none;">
+        <div class="comment-modal-backdrop" onclick="closeComplaintModal()"></div>
+        <div class="comment-modal-content complaint-x-modal-content" style="width:1100px;max-width:98vw;max-height:80vh;background:#fff;border-radius:22px;box-shadow:0 4px 32px rgba(0,0,0,0.18);padding:0;overflow:hidden;display:flex;flex-direction:column;">
+            <div style="padding:0 0 0 0;position:relative;flex-shrink:0;">
+                <button class="comment-modal-close" onclick="closeComplaintModal()" title="Cerrar" style="position:absolute;top:18px;right:18px;background:transparent;border:none;font-size:1.3rem;color:#555;z-index:2;">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="complaint-modal-header" style="padding:28px 40px 10px 40px;border-bottom:1px solid #f0f0f0;display:flex;flex-direction:column;gap:6px;">
+                    <h2 id="complaint-modal-title" style="font-size:1.35rem;font-weight:700;margin:0;color:#222;">Reclamo</h2>
+                    <div class="complaint-modal-meta" style="font-size:0.98rem;color:#888;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+                        <span id="complaint-modal-creator"></span>
+                        <span id="complaint-modal-date"></span>
+                        <span id="complaint-modal-status" style="font-weight:600;"></span>
+                    </div>
+                </div>
+            </div>
+            <div style="overflow-y:auto;flex:1;display:flex;flex-direction:column;">
+                <div style="padding:18px 40px 0 40px;display:grid;grid-template-columns:1fr 1fr;gap:32px 32px;align-items:start;">
+                    <div style="grid-column:1/2;">
+                        <div class="complaint-modal-description" id="complaint-modal-description" style="font-size:1.08rem;color:#222;margin-bottom:10px;"></div>
+                        <div class="complaint-modal-attachments" id="complaint-modal-attachments" style="margin-bottom:10px;"></div>
+                    </div>
+                    <div style="grid-column:2/3;display:flex;flex-direction:column;gap:12px;">
+                        <form id="complaint-assign-form" style="margin-bottom:0;display:flex;flex-direction:column;gap:6px;background:#f7fafd;padding:12px 16px;border-radius:12px;">
+                            <label style="font-size:0.98rem;color:#555;font-weight:500;">Asignar a usuarios:</label>
+                            <select id="complaint-assign-users" name="asignados" multiple style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid #e0e0e0;background:#fafbfc;font-size:1rem;margin-bottom:8px;min-height:60px;"></select>
+                            <button type="submit" class="post-btn" style="background:#1d9bf0;color:#fff;border:none;border-radius:999px;padding:8px 0;font-weight:600;font-size:1rem;transition:background 0.2s;">Asignar</button>
+                        </form>
+                        <form id="complaint-status-form" style="margin-bottom:0;display:flex;flex-direction:column;gap:6px;background:#f7fafd;padding:12px 16px;border-radius:12px;">
+                            <label for="complaint-status-select" style="font-size:0.98rem;color:#555;font-weight:500;">Estado:</label>
+                            <select id="complaint-status-select" name="estado" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid #e0e0e0;background:#fafbfc;font-size:1rem;margin-bottom:8px;"></select>
+                            <button type="submit" class="post-btn" style="background:#1d9bf0;color:#fff;border:none;border-radius:999px;padding:8px 0;font-weight:600;font-size:1rem;transition:background 0.2s;">Cambiar estado</button>
+                        </form>
+                    </div>
+                </div>
+                <div id="complaint-comments-list" class="modal-comments-list" style="padding:18px 40px 0 40px;"></div>
+            </div>
+            
+            <form id="complaint-comment-form" enctype="multipart/form-data" class="modal-comment-form" style="padding:18px 40px 18px 40px;display:flex;flex-direction:column;gap:8px;border-top:1px solid #f0f0f0;background:#fff;flex-shrink:0;">
+                {% csrf_token %}
+                <textarea name="contenido" id="complaint-comment-input" class="modal-comment-input" placeholder="Escribe un comentario..." required style="border-radius:12px;border:1px solid #e0e0e0;padding:10px 12px;font-size:1.05rem;min-height:60px;background:#fafbfc;"></textarea>
+                <div class="modal-comment-files" style="display:flex;gap:16px;align-items:center;">
+                    <label class="file-input-label" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.98rem;color:#1d9bf0;font-weight:500;">
+                        <i class="fas fa-image"></i>
+                        <input type="file" name="imagen" class="file-input" accept="image/*" hidden>
+                        <span>Imagen</span>
+                    </label>
+                    <label class="file-input-label" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.98rem;color:#1d9bf0;font-weight:500;">
+                        <i class="fas fa-file"></i>
+                        <input type="file" name="archivo" class="file-input" accept=".pdf,.doc,.docx,.xls,.xlsx" hidden>
+                        <span>Archivo</span>
+                    </label>
+                </div>
+                <div class="modal-comment-actions" style="display:flex;justify-content:flex-end;">
+                    <button type="submit" class="post-btn" style="background:#1d9bf0;color:#fff;border:none;border-radius:999px;padding:8px 32px;font-weight:600;font-size:1rem;transition:background 0.2s;">Comentar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

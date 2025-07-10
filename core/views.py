@@ -32,7 +32,7 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.http import require_http_methods, require_POST, require_GET
 
 # ────────────────────────────────
 # 📦 Local Imports
@@ -50,7 +50,8 @@ from .models import (
     LiquidacionOspil, LiquidacionOsfatlyf, LiquidacionPAMIOncologico,
     LiquidacionPAMIPanales, LiquidacionPAMIVacunas, LiquidacionAndinaART,
     LiquidacionAsociart, LiquidacionColoniaSuiza, LiquidacionExperta,
-    LiquidacionGalenoART, LiquidacionPrevencionART
+    LiquidacionGalenoART, LiquidacionPrevencionART, Publication, PublicationLike, PublicationComment,
+    Reclamo, ReclamoComment
 )
 from .utils import (
     obtener_datos_panel,
@@ -975,3 +976,437 @@ def panel_liquidaciones(request):
     
 
     return render(request, "panel_liquidaciones.html")
+
+
+
+def foro(request):
+    """
+    Vista que muestra el foro con publicaciones reales de la base de datos.
+    """
+    # Obtener todas las publicaciones ordenadas por fecha de creación (más recientes primero)
+    publicaciones = Publication.objects.select_related(
+        'usuario_creacion', 
+        'usuario_modificacion'
+    ).prefetch_related(
+        'likes__usuario',
+        'comentarios__usuario'
+    ).all()
+    
+    # Verificar si el usuario actual ha dado like a cada publicación
+    if request.user.is_authenticated:
+        for publicacion in publicaciones:
+            publicacion.user_has_liked = publicacion.likes.filter(usuario=request.user).exists()
+    
+    return render(request, "foro.html", {
+        'publicaciones': publicaciones
+    })
+
+
+@login_required
+@require_POST
+def crear_publicacion(request):
+    """
+    Vista para crear una nueva publicación en el foro.
+    """
+    try:
+        descripcion = request.POST.get('descripcion', '').strip()
+        categoria = request.POST.get('categoria', '').strip()
+        
+        if not descripcion:
+            return JsonResponse({
+                'success': False,
+                'error': 'La descripción es obligatoria'
+            }, status=400)
+        
+        if not categoria:
+            return JsonResponse({
+                'success': False,
+                'error': 'La categoría es obligatoria'
+            }, status=400)
+        
+        # Crear la publicación
+        publicacion = Publication.objects.create(
+            descripcion=descripcion,
+            categoria=categoria,
+            usuario_creacion=request.user,
+            usuario_modificacion=request.user
+        )
+        
+        # Manejar archivos adjuntos
+        if 'imagen' in request.FILES:
+            publicacion.imagen = request.FILES['imagen']
+        
+        if 'archivo' in request.FILES:
+            publicacion.archivo = request.FILES['archivo']
+        
+        publicacion.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Publicación creada exitosamente',
+            'publicacion_id': publicacion.id
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Error al crear la publicación: {str(e)}'
+        }, status=500)
+
+
+@login_required
+@require_POST
+def toggle_like(request, publicacion_id):
+    """
+    Vista para dar/quitar like a una publicación.
+    """
+    try:
+        publicacion = get_object_or_404(Publication, id=publicacion_id)
+        
+        # Verificar si el usuario ya dio like
+        like_existente = PublicationLike.objects.filter(
+            publicacion=publicacion,
+            usuario=request.user
+        ).first()
+        
+        if like_existente:
+            # Quitar like
+            like_existente.delete()
+            liked = False
+        else:
+            # Dar like
+            PublicationLike.objects.create(
+                publicacion=publicacion,
+                usuario=request.user
+            )
+            liked = True
+        
+        return JsonResponse({
+            'success': True,
+            'liked': liked,
+            'likes_count': publicacion.likes_count
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Error al procesar el like: {str(e)}'
+        }, status=500)
+
+
+@login_required
+@require_POST
+def crear_comentario(request, publicacion_id):
+    """
+    Vista para crear un comentario en una publicación.
+    """
+    try:
+        publicacion = get_object_or_404(Publication, id=publicacion_id)
+        contenido = request.POST.get('contenido', '').strip()
+        
+        if not contenido:
+            return JsonResponse({
+                'success': False,
+                'error': 'El contenido del comentario es obligatorio'
+            }, status=400)
+        
+        # Crear el comentario
+        comentario = PublicationComment.objects.create(
+            publicacion=publicacion,
+            usuario=request.user,
+            contenido=contenido
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Comentario creado exitosamente',
+            'comentario_id': comentario.id,
+            'comentarios_count': publicacion.comentarios_count
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Error al crear el comentario: {str(e)}'
+        }, status=500)
+
+
+@login_required
+@require_POST
+def eliminar_publicacion(request, publicacion_id):
+    """
+    Vista para eliminar una publicación (solo el autor puede eliminarla).
+    """
+    try:
+        publicacion = get_object_or_404(Publication, id=publicacion_id)
+        
+        # Verificar que el usuario sea el autor de la publicación
+        if publicacion.usuario_creacion != request.user:
+            return JsonResponse({
+                'success': False,
+                'error': 'No tienes permisos para eliminar esta publicación'
+            }, status=403)
+        
+        publicacion.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Publicación eliminada exitosamente'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Error al eliminar la publicación: {str(e)}'
+        }, status=500)
+
+@login_required
+@require_POST
+def eliminar_comentario(request, comentario_id):
+    """
+    Elimina (borrado lógico) un comentario si el usuario es el autor o el autor de la publicación.
+    """
+    from .models import PublicationComment
+    comentario = get_object_or_404(PublicationComment, id=comentario_id)
+    if comentario.usuario != request.user and comentario.publicacion.usuario_creacion != request.user:
+        return JsonResponse({'success': False, 'error': 'No tienes permisos para eliminar este comentario'}, status=403)
+    comentario.delete()
+    return JsonResponse({'success': True, 'message': 'Comentario eliminado'})
+
+@login_required
+@require_POST
+def responder_comentario(request, comentario_id):
+    """
+    Crea una respuesta a un comentario (comentario hijo).
+    """
+    from .models import PublicationComment
+    comentario_padre = get_object_or_404(PublicationComment, id=comentario_id)
+    contenido = request.POST.get('contenido', '').strip()
+    if not contenido:
+        return JsonResponse({'success': False, 'error': 'El contenido de la respuesta es obligatorio'}, status=400)
+    comentario = PublicationComment.objects.create(
+        publicacion=comentario_padre.publicacion,
+        usuario=request.user,
+        contenido=contenido,
+        parent=comentario_padre
+    )
+    return JsonResponse({'success': True, 'message': 'Respuesta publicada', 'comentario_id': comentario.id})
+
+@require_GET
+@login_required
+def obtener_comentarios(request, publicacion_id):
+    """
+    Devuelve los comentarios de una publicación en formato JSON, anidados y con soporte de borrado lógico.
+    """
+    from .models import PublicationComment
+    def serialize_comment(c):
+        return {
+            'id': c.id,
+            'usuario': c.usuario.get_full_name() or c.usuario.username,
+            'contenido': '[Comentario eliminado]' if c.is_deleted else c.contenido,
+            'fecha': c.fecha_comentario.strftime('%d/%m/%Y %H:%M'),
+            'is_deleted': c.is_deleted,
+            'puede_eliminar': (c.usuario == request.user or c.publicacion.usuario_creacion == request.user),
+            'replies': [serialize_comment(r) for r in c.replies.filter(is_deleted=False).order_by('fecha_comentario')]
+        }
+    comentarios = PublicationComment.objects.filter(publicacion_id=publicacion_id, parent__isnull=True).select_related('usuario').order_by('fecha_comentario')
+    data = [serialize_comment(c) for c in comentarios]
+    return JsonResponse({'comentarios': data})
+
+@login_required
+@require_POST
+def crear_reclamo(request):
+    """
+    Crea un nuevo reclamo (AJAX).
+    """
+    titulo = request.POST.get('titulo', '').strip()
+    descripcion = request.POST.get('descripcion', '').strip()
+    imagen = request.FILES.get('imagen')
+    archivo = request.FILES.get('archivo')
+    if not titulo or not descripcion:
+        return JsonResponse({'success': False, 'error': 'Título y descripción son obligatorios.'}, status=400)
+    reclamo = Reclamo.objects.create(
+        titulo=titulo,
+        descripcion=descripcion,
+        usuario_creador=request.user,
+        ultima_actualizacion_por=request.user,
+        imagen=imagen,
+        archivo=archivo
+    )
+    return JsonResponse({'success': True, 'message': 'Reclamo creado', 'reclamo_id': reclamo.id})
+
+@login_required
+@require_GET
+def listar_reclamos(request):
+    """
+    Devuelve los reclamos para el aside (solo no eliminados, ordenados por fecha).
+    """
+    reclamos = Reclamo.objects.filter(is_deleted=False).order_by('-fecha_creacion')[:10]
+    data = [
+        {
+            'id': r.id,
+            'titulo': r.titulo,
+            'descripcion': r.descripcion[:120] + ('...' if len(r.descripcion) > 120 else ''),
+            'usuario_creador': r.usuario_creador.get_full_name() or r.usuario_creador.username,
+            'fecha_creacion': r.fecha_creacion.strftime('%d/%m/%Y'),
+            'ultima_actualizacion_por': r.ultima_actualizacion_por.get_full_name() if r.ultima_actualizacion_por else '',
+            'estado': r.get_estado_display(),
+            'notificaciones_activas': r.notificaciones_activas,
+            'es_publico': r.es_publico,
+        }
+        for r in reclamos
+    ]
+    return JsonResponse({'reclamos': data})
+
+@login_required
+@require_POST
+def cambiar_estado_reclamo(request, reclamo_id):
+    """
+    Cambia el estado de un reclamo (resuelto, cerrado, etc.).
+    """
+    nuevo_estado = request.POST.get('estado')
+    reclamo = get_object_or_404(Reclamo, id=reclamo_id, is_deleted=False)
+    if nuevo_estado not in dict(Reclamo.ESTADOS):
+        return JsonResponse({'success': False, 'error': 'Estado inválido.'}, status=400)
+    reclamo.estado = nuevo_estado
+    if nuevo_estado == 'resuelto':
+        from django.utils import timezone
+        reclamo.fecha_resolucion = timezone.now()
+    reclamo.ultima_actualizacion_por = request.user
+    reclamo.save()
+    return JsonResponse({'success': True, 'message': 'Estado actualizado.'})
+
+@login_required
+@require_POST
+def eliminar_reclamo(request, reclamo_id):
+    """
+    Borrado lógico de un reclamo (solo autor o admin).
+    """
+    reclamo = get_object_or_404(Reclamo, id=reclamo_id, is_deleted=False)
+    if reclamo.usuario_creador != request.user and not request.user.is_superuser:
+        return JsonResponse({'success': False, 'error': 'No tienes permisos para eliminar este reclamo.'}, status=403)
+    reclamo.is_deleted = True
+    reclamo.save(update_fields=['is_deleted'])
+    return JsonResponse({'success': True, 'message': 'Reclamo eliminado.'})
+
+@login_required
+@require_POST
+def toggle_notificaciones_reclamo(request, reclamo_id):
+    """
+    Activa/desactiva notificaciones para un reclamo.
+    """
+    reclamo = get_object_or_404(Reclamo, id=reclamo_id, is_deleted=False)
+    reclamo.notificaciones_activas = not reclamo.notificaciones_activas
+    reclamo.ultima_actualizacion_por = request.user
+    reclamo.save(update_fields=['notificaciones_activas', 'ultima_actualizacion_por'])
+    return JsonResponse({'success': True, 'notificaciones_activas': reclamo.notificaciones_activas})
+
+@login_required
+@require_GET
+def detalle_reclamo(request, reclamo_id):
+    from .models import Reclamo
+    reclamo = get_object_or_404(Reclamo, id=reclamo_id, is_deleted=False)
+    asignados_ids = list(reclamo.asignados.values_list('id', flat=True)) if hasattr(reclamo, 'asignados') else []
+    return JsonResponse({
+        'success': True,
+        'titulo': reclamo.titulo,
+        'descripcion': reclamo.descripcion,
+        'usuario_creador': reclamo.usuario_creador.get_full_name() or reclamo.usuario_creador.username,
+        'fecha_creacion': reclamo.fecha_creacion.strftime('%d/%m/%Y'),
+        'estado': reclamo.estado,
+        'estado_display': reclamo.get_estado_display(),
+        'imagen_url': reclamo.imagen.url if reclamo.imagen else None,
+        'archivo_url': reclamo.archivo.url if reclamo.archivo else None,
+        'asignados_ids': asignados_ids,
+    })
+
+@login_required
+@require_GET
+def comentarios_reclamo(request, reclamo_id):
+    reclamo = get_object_or_404(Reclamo, id=reclamo_id, is_deleted=False)
+    def serialize_comment(c):
+        return {
+            'id': c.id,
+            'usuario': c.usuario.get_full_name() or c.usuario.username,
+            'contenido': '[Comentario eliminado]' if c.is_deleted else c.contenido,
+            'fecha': c.fecha_comentario.strftime('%d/%m/%Y %H:%M'),
+            'is_deleted': c.is_deleted,
+            'puede_eliminar': (c.usuario == request.user or reclamo.usuario_creador == request.user),
+            'imagen_url': c.imagen.url if c.imagen else None,
+            'archivo_url': c.archivo.url if c.archivo else None,
+            'replies': [serialize_comment(r) for r in c.replies.filter(is_deleted=False).order_by('fecha_comentario')]
+        }
+    comentarios = ReclamoComment.objects.filter(reclamo=reclamo, parent__isnull=True).select_related('usuario').order_by('fecha_comentario')
+    data = [serialize_comment(c) for c in comentarios]
+    return JsonResponse({'comentarios': data})
+
+@login_required
+@require_POST
+def comentar_reclamo(request, reclamo_id):
+    reclamo = get_object_or_404(Reclamo, id=reclamo_id, is_deleted=False)
+    contenido = request.POST.get('contenido', '').strip()
+    imagen = request.FILES.get('imagen')
+    archivo = request.FILES.get('archivo')
+    if not contenido:
+        return JsonResponse({'success': False, 'error': 'El contenido es obligatorio.'}, status=400)
+    comentario = ReclamoComment.objects.create(
+        reclamo=reclamo,
+        usuario=request.user,
+        contenido=contenido,
+        imagen=imagen,
+        archivo=archivo
+    )
+    return JsonResponse({'success': True, 'message': 'Comentario publicado', 'comentario_id': comentario.id})
+
+@login_required
+@require_POST
+def responder_comentario_reclamo(request, comentario_id):
+    comentario_padre = get_object_or_404(ReclamoComment, id=comentario_id)
+    contenido = request.POST.get('contenido', '').strip()
+    if not contenido:
+        return JsonResponse({'success': False, 'error': 'El contenido de la respuesta es obligatorio'}, status=400)
+    comentario = ReclamoComment.objects.create(
+        reclamo=comentario_padre.reclamo,
+        usuario=request.user,
+        contenido=contenido,
+        parent=comentario_padre
+    )
+    return JsonResponse({'success': True, 'message': 'Respuesta publicada', 'comentario_id': comentario.id})
+
+@login_required
+@require_POST
+def eliminar_comentario_reclamo(request, comentario_id):
+    comentario = get_object_or_404(ReclamoComment, id=comentario_id)
+    if comentario.usuario != request.user and comentario.reclamo.usuario_creador != request.user:
+        return JsonResponse({'success': False, 'error': 'No tienes permisos para eliminar este comentario'}, status=403)
+    comentario.is_deleted = True
+    comentario.save(update_fields=['is_deleted'])
+    return JsonResponse({'success': True, 'message': 'Comentario eliminado'})
+
+@login_required
+@require_POST
+def asignar_reclamo(request, reclamo_id):
+    import json
+    from .models import Reclamo, User
+    reclamo = get_object_or_404(Reclamo, id=reclamo_id, is_deleted=False)
+    data = json.loads(request.body)
+    asignados = data.get('asignados', [])
+    users = User.objects.filter(id__in=asignados)
+    reclamo.asignados.set(users)
+    reclamo.save()
+    return JsonResponse({'success': True, 'message': 'Usuarios asignados'})
+
+@login_required
+@require_GET
+def usuarios_asignables_reclamo(request):
+    from .models import User
+    usuarios = User.objects.all()
+    data = [{'id': u.id, 'nombre': u.get_full_name() or u.username} for u in usuarios]
+    return JsonResponse({'usuarios': data})
+
+@login_required
+@require_GET
+def estados_reclamo(request):
+    from .models import Reclamo
+    estados = [{'value': e[0], 'display': e[1]} for e in Reclamo.ESTADOS]
+    return JsonResponse({'estados': estados})

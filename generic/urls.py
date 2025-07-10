@@ -79,4 +79,29 @@ urlpatterns = [
     path("transferencias/", views.transferencias_tesorera, name="transferencias"),
 
     path("panel-liquidaciones/", views.panel_liquidaciones, name="panel_liquidaciones"),
+
+    path("foro/", views.foro, name="foro"),
+    path("foro/crear-publicacion/", views.crear_publicacion, name="crear_publicacion"),
+    path("foro/publicacion/<int:publicacion_id>/like/", views.toggle_like, name="toggle_like"),
+    path("foro/publicacion/<int:publicacion_id>/comentar/", views.crear_comentario, name="crear_comentario"),
+    path("foro/publicacion/<int:publicacion_id>/eliminar/", views.eliminar_publicacion, name="eliminar_publicacion"),
+    path("foro/publicacion/<int:publicacion_id>/comentarios/", views.obtener_comentarios, name="obtener_comentarios"),
+    path("foro/comentario/<int:comentario_id>/eliminar/", views.eliminar_comentario, name="eliminar_comentario"),
+    path("foro/comentario/<int:comentario_id>/responder/", views.responder_comentario, name="responder_comentario"),
+    path("foro/reclamos/crear/", views.crear_reclamo, name="crear_reclamo"),
+    path("foro/reclamos/listar/", views.listar_reclamos, name="listar_reclamos"),
+    path("foro/reclamos/<int:reclamo_id>/cambiar-estado/", views.cambiar_estado_reclamo, name="cambiar_estado_reclamo"),
+    path("foro/reclamos/<int:reclamo_id>/eliminar/", views.eliminar_reclamo, name="eliminar_reclamo"),
+    path("foro/reclamos/<int:reclamo_id>/toggle-notificaciones/", views.toggle_notificaciones_reclamo, name="toggle_notificaciones_reclamo"),
+    path("foro/reclamos/<int:reclamo_id>/detalle/", views.detalle_reclamo, name="detalle_reclamo"),
+    path("foro/reclamos/<int:reclamo_id>/comentarios/", views.comentarios_reclamo, name="comentarios_reclamo"),
+    path("foro/reclamos/<int:reclamo_id>/comentar/", views.comentar_reclamo, name="comentar_reclamo"),
+    path("foro/reclamos/<int:reclamo_id>/asignar/", views.asignar_reclamo, name="asignar_reclamo"),
+    path("foro/reclamos/usuarios-asignables/", views.usuarios_asignables_reclamo, name="usuarios_asignables_reclamo"),
+    path("foro/reclamos/estados/", views.estados_reclamo, name="estados_reclamo"),
+    path("foro/reclamos/comentario/<int:comentario_id>/responder/", views.responder_comentario_reclamo, name="responder_comentario_reclamo"),
+    path("foro/reclamos/comentario/<int:comentario_id>/eliminar/", views.eliminar_comentario_reclamo, name="eliminar_comentario_reclamo"),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

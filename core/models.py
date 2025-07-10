@@ -76,7 +76,7 @@ class CargaDatos(models.Model):
 
     farmacia = models.ForeignKey(Farmacia, on_delete=models.CASCADE)
     obra_social = models.CharField(max_length=50, choices=OBRAS_SOCIALES, blank=False)
-    periodo = models.CharField(max_length=50, blank=False, default="none")
+    periodo = models.DateField(max_length=50, blank=False, default="none")
     numero_presentacion = models.CharField(max_length=50, null=True, blank=False)
     estado = models.CharField(max_length=100, choices=ESTADOS, default='Enviada', blank=False)
     cantidad_lotes = models.IntegerField(null=True, blank=False)
@@ -486,3 +486,292 @@ class LiquidacionPrevencionART(models.Model):
     class Meta:
         verbose_name = "Liquidación Prevención ART"
         verbose_name_plural = "Liquidaciones Prevención ART"
+
+    def __str__(self):
+        return f"{self.farmacia} - {self.fecha_liquidacion} - {self.subtotal_pagar}"
+
+
+class Publication(models.Model):
+    """
+    Modelo para las publicaciones del foro
+    """
+    CATEGORIAS = [
+        ('obra-social', 'Obra social'),
+        ('anuncio', 'Anuncio'),
+        ('recordatorio', 'Recordatorio'),
+    ]
+
+    # Información básica
+    descripcion = models.TextField(help_text="Contenido de la publicación")
+    categoria = models.CharField(
+        max_length=20, 
+        choices=CATEGORIAS, 
+        help_text="Categoría de la publicación"
+    )
+    
+    # Archivos adjuntos
+    imagen = models.ImageField(
+        upload_to='publicaciones/imagenes/', 
+        null=True, 
+        blank=True,
+        help_text="Imagen adjunta a la publicación"
+    )
+    archivo = models.FileField(
+        upload_to='publicaciones/archivos/', 
+        null=True, 
+        blank=True,
+        help_text="Archivo adjunto a la publicación"
+    )
+    
+    # Usuarios y fechas
+    usuario_creacion = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='publicaciones_creadas',
+        help_text="Usuario que creó la publicación"
+    )
+    usuario_modificacion = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='publicaciones_modificadas',
+        help_text="Usuario que modificó la publicación por última vez"
+    )
+    
+    # Fechas
+    fecha_creacion = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Fecha y hora de creación"
+    )
+    fecha_modificacion = models.DateTimeField(
+        auto_now=True,
+        help_text="Fecha y hora de la última modificación"
+    )
+    
+    # Contadores
+    likes_count = models.PositiveIntegerField(
+        default=0,
+        help_text="Número total de likes"
+    )
+    comentarios_count = models.PositiveIntegerField(
+        default=0,
+        help_text="Número total de comentarios"
+    )
+
+    class Meta:
+        verbose_name = "Publicación"
+        verbose_name_plural = "Publicaciones"
+        ordering = ['-fecha_creacion']
+
+    def __str__(self):
+        return f"{self.usuario_creacion.username} - {self.categoria} - {self.fecha_creacion.strftime('%d/%m/%Y %H:%M')}"
+
+    def get_tiempo_transcurrido(self):
+        """
+        Retorna el tiempo transcurrido desde la creación en formato legible
+        """
+        from django.utils import timezone
+        from datetime import datetime
+        
+        ahora = timezone.now()
+        diferencia = ahora - self.fecha_creacion
+        
+        if diferencia.days > 0:
+            return f"hace {diferencia.days} día{'s' if diferencia.days != 1 else ''}"
+        elif diferencia.seconds >= 3600:
+            horas = diferencia.seconds // 3600
+            return f"hace {horas} hora{'s' if horas != 1 else ''}"
+        elif diferencia.seconds >= 60:
+            minutos = diferencia.seconds // 60
+            return f"hace {minutos} minuto{'s' if minutos != 1 else ''}"
+        else:
+            return "ahora mismo"
+
+
+class PublicationLike(models.Model):
+    """
+    Modelo para los likes de las publicaciones
+    """
+    publicacion = models.ForeignKey(
+        Publication, 
+        on_delete=models.CASCADE,
+        related_name='likes',
+        help_text="Publicación que recibió el like"
+    )
+    usuario = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='likes_dados',
+        help_text="Usuario que dio el like"
+    )
+    fecha_like = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Fecha y hora del like"
+    )
+
+    class Meta:
+        verbose_name = "Like de Publicación"
+        verbose_name_plural = "Likes de Publicaciones"
+        unique_together = ['publicacion', 'usuario']  # Un usuario solo puede dar like una vez
+        ordering = ['-fecha_like']
+
+    def __str__(self):
+        return f"{self.usuario.username} → {self.publicacion}"
+
+    def save(self, *args, **kwargs):
+        """
+        Sobrescribe el método save para actualizar el contador de likes
+        """
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        
+        if is_new:
+            # Incrementar contador de likes
+            self.publicacion.likes_count += 1
+            self.publicacion.save(update_fields=['likes_count'])
+
+    def delete(self, *args, **kwargs):
+        """
+        Sobrescribe el método delete para actualizar el contador de likes
+        """
+        # Decrementar contador de likes
+        self.publicacion.likes_count = max(0, self.publicacion.likes_count - 1)
+        self.publicacion.save(update_fields=['likes_count'])
+        super().delete(*args, **kwargs)
+
+
+class PublicationComment(models.Model):
+    """
+    Modelo para los comentarios de las publicaciones
+    """
+    publicacion = models.ForeignKey(
+        Publication, 
+        on_delete=models.CASCADE,
+        related_name='comentarios',
+        help_text="Publicación a la que pertenece el comentario"
+    )
+    usuario = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='comentarios_realizados',
+        help_text="Usuario que realizó el comentario"
+    )
+    contenido = models.TextField(
+        help_text="Contenido del comentario"
+    )
+    fecha_comentario = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Fecha y hora del comentario"
+    )
+    parent = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='replies',
+        help_text="Comentario padre si es una respuesta"
+    )
+    is_deleted = models.BooleanField(
+        default=False,
+        help_text="Indica si el comentario fue eliminado (borrado lógico)"
+    )
+
+    class Meta:
+        verbose_name = "Comentario de Publicación"
+        verbose_name_plural = "Comentarios de Publicaciones"
+        ordering = ['fecha_comentario']
+
+    def __str__(self):
+        if self.is_deleted:
+            return f"[Eliminado]"
+        return f"{self.usuario.username} → {self.publicacion} - {self.fecha_comentario.strftime('%d/%m/%Y %H:%M')}"
+
+    def save(self, *args, **kwargs):
+        """
+        Sobrescribe el método save para actualizar el contador de comentarios
+        """
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        
+        if is_new and not self.is_deleted:
+            # Incrementar contador de comentarios
+            self.publicacion.comentarios_count += 1
+            self.publicacion.save(update_fields=['comentarios_count'])
+
+    def delete(self, *args, **kwargs):
+        """
+        Sobrescribe el método delete para actualizar el contador de comentarios
+        """
+        # Decrementar contador de comentarios
+        self.publicacion.comentarios_count = max(0, self.publicacion.comentarios_count - 1)
+        self.publicacion.save(update_fields=['comentarios_count'])
+        super().delete(*args, **kwargs)
+
+class Reclamo(models.Model):
+    ESTADOS = [
+        ('pendiente', 'Pendiente'),
+        ('en_progreso', 'En progreso'),
+        ('resuelto', 'Resuelto'),
+        ('cerrado', 'Cerrado'),
+    ]
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField()
+    usuario_creador = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reclamos_creados')
+    usuario_asignado = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reclamos_asignados')
+    asignados = models.ManyToManyField(User, related_name='reclamos_asignados_multiple', blank=True, help_text='Usuarios asignados a este reclamo (múltiples)')
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
+    fecha_resolucion = models.DateTimeField(null=True, blank=True)
+    ultima_actualizacion_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reclamos_actualizados')
+    notificaciones_activas = models.BooleanField(default=True)
+    es_publico = models.BooleanField(default=True)
+    imagen = models.ImageField(upload_to='reclamos/imagenes/', null=True, blank=True)
+    archivo = models.FileField(upload_to='reclamos/archivos/', null=True, blank=True)
+    is_deleted = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Reclamo'
+        verbose_name_plural = 'Reclamos'
+        ordering = ['-fecha_creacion']
+
+    def __str__(self):
+        return f"{self.titulo} ({self.get_estado_display()})"
+
+class ReclamoComment(models.Model):
+    reclamo = models.ForeignKey(
+        'Reclamo',
+        on_delete=models.CASCADE,
+        related_name='comentarios',
+        help_text="Reclamo al que pertenece el comentario"
+    )
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reclamo_comentarios_realizados',
+        help_text="Usuario que realizó el comentario"
+    )
+    contenido = models.TextField(help_text="Contenido del comentario")
+    fecha_comentario = models.DateTimeField(auto_now_add=True, help_text="Fecha y hora del comentario")
+    parent = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='replies',
+        help_text="Comentario padre si es una respuesta"
+    )
+    imagen = models.ImageField(upload_to='reclamos/comentarios/imagenes/', null=True, blank=True)
+    archivo = models.FileField(upload_to='reclamos/comentarios/archivos/', null=True, blank=True)
+    is_deleted = models.BooleanField(default=False, help_text="Indica si el comentario fue eliminado (borrado lógico)")
+
+    class Meta:
+        verbose_name = "Comentario de Reclamo"
+        verbose_name_plural = "Comentarios de Reclamos"
+        ordering = ['fecha_comentario']
+
+    def __str__(self):
+        if self.is_deleted:
+            return f"[Eliminado]"
+        return f"{self.usuario.username} → {self.reclamo} - {self.fecha_comentario.strftime('%d/%m/%Y %H:%M')}"
