@@ -51,7 +51,7 @@ from .models import (
     LiquidacionPAMIPanales, LiquidacionPAMIVacunas, LiquidacionAndinaART,
     LiquidacionAsociart, LiquidacionColoniaSuiza, LiquidacionExperta,
     LiquidacionGalenoART, LiquidacionPrevencionART, Publication, PublicationLike, PublicationComment,
-    Reclamo, ReclamoComment
+    Reclamo, ReclamoComment, Notification
 )
 from .utils import (
     obtener_datos_panel,
@@ -237,12 +237,27 @@ def actualizar_usuario(request):
 
 @login_required
 def calendario(request):
-
     # Obtener presentaciones del mes actual
     today = now()
     presentaciones = Presentacion.objects.filter(
         fecha__year=today.year, fecha__month=today.month
     ).order_by('fecha')
+
+    # --- NOTIFICAR SI FALTAN 3 DÍAS PARA ALGUNA PRESENTACIÓN ---
+    User = get_user_model()
+    for p in presentaciones:
+        dias_restantes = (p.fecha - timezone.now().date()).days
+        if dias_restantes == 3:
+            mensaje = f"¡Recordatorio! Faltan 3 días para la presentación de {p.obra_social}"
+            for usuario in User.objects.all():
+                if not Notification.objects.filter(usuario=usuario, mensaje=mensaje, tipo="foro").exists():
+                    Notification.objects.create(
+                        usuario=usuario,
+                        mensaje=mensaje,
+                        link=f"/calendario/",
+                        tipo="foro"
+                    )
+    # --- FIN NOTIFICACION ---
 
     return render(request, 'calendario.html', {"presentaciones": presentaciones})
 
@@ -337,12 +352,33 @@ def guardar_presentacion(request):
             return redirect("calendario")
 
         # ✅ Guardar en la base de datos
-        Presentacion.objects.create(
+        presentacion = Presentacion.objects.create(
             usuario=request.user,
             fecha=fecha,
             obra_social=obra_social,
             quincena=quincena
         )
+
+        # --- NOTIFICAR A TODOS LOS USUARIOS ---
+        User = get_user_model()
+        dias_restantes = (fecha - datetime.now().date()).days
+        if dias_restantes > 1:
+            tiempo = f"en {dias_restantes} días"
+        elif dias_restantes == 1:
+            tiempo = "mañana"
+        elif dias_restantes == 0:
+            tiempo = "hoy"
+        else:
+            tiempo = f"hace {abs(dias_restantes)} días"
+        mensaje = f"Fecha de presentacion para {obra_social}: {tiempo}"
+        for usuario in User.objects.all():
+            Notification.objects.create(
+                usuario=usuario,
+                mensaje=mensaje,
+                link=f"/calendar_farmacias/",
+                tipo="foro"
+            )
+        # --- FIN NOTIFICACION ---
 
         messages.success(request, "Presentación guardada exitosamente.")
         return redirect("calendario")
@@ -1041,6 +1077,19 @@ def crear_publicacion(request):
         
         publicacion.save()
         
+        # --- NOTIFICAR A TODOS LOS USUARIOS (excepto el creador) ---
+        User = get_user_model()
+        categoria_display = dict(Publication.CATEGORIAS).get(categoria, categoria)
+        mensaje = f"{request.user.get_full_name() or request.user.username} publicó un/a {categoria_display}"
+        for usuario in User.objects.exclude(id=request.user.id):
+            Notification.objects.create(
+                usuario=usuario,
+                mensaje=mensaje,
+                link=f"/foro/",
+                tipo="foro"
+            )
+        # --- FIN NOTIFICACION ---
+        
         return JsonResponse({
             'success': True,
             'message': 'Publicación creada exitosamente',
@@ -1117,6 +1166,16 @@ def crear_comentario(request, publicacion_id):
             contenido=contenido
         )
         
+        # --- NOTIFICAR AL CREADOR DE LA PUBLICACION ---
+        if publicacion.usuario_creacion != request.user:
+            Notification.objects.create(
+                usuario=publicacion.usuario_creacion,
+                mensaje=f"{request.user.get_full_name() or request.user.username} ha comentado tu publicación '{publicacion.descripcion[:40]}{'...' if len(publicacion.descripcion) > 40 else ''}'",
+                link=f"/foro/",
+                tipo="foro"
+            )
+        # --- FIN NOTIFICACION ---
+        
         return JsonResponse({
             'success': True,
             'message': 'Comentario creado exitosamente',
@@ -1190,6 +1249,14 @@ def responder_comentario(request, comentario_id):
         contenido=contenido,
         parent=comentario_padre
     )
+    # Notificar al autor del comentario padre si no es el mismo usuario
+    if comentario_padre.usuario != request.user:
+        Notification.objects.create(
+            usuario=comentario_padre.usuario,
+            mensaje=f"{request.user.get_full_name() or request.user.username} respondió a tu comentario en la publicación '{comentario_padre.publicacion.descripcion[:40]}{'...' if len(comentario_padre.publicacion.descripcion) > 40 else ''}'",
+            link=f"/foro/",
+            tipo="foro"
+        )
     return JsonResponse({'success': True, 'message': 'Respuesta publicada', 'comentario_id': comentario.id})
 
 @require_GET
@@ -1233,6 +1300,8 @@ def crear_reclamo(request):
         imagen=imagen,
         archivo=archivo
     )
+    # Si quieres notificar a alguien, aquí puedes usar:
+    # Notification.objects.create(usuario=..., mensaje=..., link=f"/foro/#reclamo-{reclamo.id}", tipo="reclamo_estado")
     return JsonResponse({'success': True, 'message': 'Reclamo creado', 'reclamo_id': reclamo.id})
 
 @login_required
@@ -1262,7 +1331,7 @@ def listar_reclamos(request):
 @require_POST
 def cambiar_estado_reclamo(request, reclamo_id):
     """
-    Cambia el estado de un reclamo (resuelto, cerrado, etc.).
+    Cambia el estado de un reclamo (resuelto, cerrado, etc.) y notifica a los usuarios involucrados.
     """
     nuevo_estado = request.POST.get('estado')
     reclamo = get_object_or_404(Reclamo, id=reclamo_id, is_deleted=False)
@@ -1274,6 +1343,22 @@ def cambiar_estado_reclamo(request, reclamo_id):
         reclamo.fecha_resolucion = timezone.now()
     reclamo.ultima_actualizacion_por = request.user
     reclamo.save()
+
+    # --- NOTIFICACIONES ---
+    usuarios_a_notificar = set()
+    if reclamo.usuario_creador:
+        usuarios_a_notificar.add(reclamo.usuario_creador)
+    for u in reclamo.asignados.all():
+        usuarios_a_notificar.add(u)
+    for usuario in usuarios_a_notificar:
+        Notification.objects.create(
+            usuario=usuario,
+            mensaje=f"El reclamo '{reclamo.titulo}' cambió de estado a '{reclamo.get_estado_display()}'.",
+            link=f"/foro/",
+            tipo="reclamo_estado"
+        )
+    # --- FIN NOTIFICACIONES ---
+
     return JsonResponse({'success': True, 'message': 'Estado actualizado.'})
 
 @login_required
@@ -1356,6 +1441,14 @@ def comentar_reclamo(request, reclamo_id):
         imagen=imagen,
         archivo=archivo
     )
+    # Notificar al creador del reclamo si no es el mismo usuario
+    if reclamo.usuario_creador != request.user:
+        Notification.objects.create(
+            usuario=reclamo.usuario_creador,
+            mensaje=f"{request.user.get_full_name() or request.user.username} ha comentado tu reclamo '{reclamo.titulo[:40]}{'...' if len(reclamo.titulo) > 40 else ''}'",
+            link=f"/foro/",
+            tipo="reclamo_comentario"
+        )
     return JsonResponse({'success': True, 'message': 'Comentario publicado', 'comentario_id': comentario.id})
 
 @login_required
@@ -1371,6 +1464,14 @@ def responder_comentario_reclamo(request, comentario_id):
         contenido=contenido,
         parent=comentario_padre
     )
+    # Notificar al autor del comentario padre si no es el mismo usuario
+    if comentario_padre.usuario != request.user:
+        Notification.objects.create(
+            usuario=comentario_padre.usuario,
+            mensaje=f"{request.user.get_full_name() or request.user.username} respondió a tu comentario en el reclamo '{comentario_padre.reclamo.titulo[:40]}{'...' if len(comentario_padre.reclamo.titulo) > 40 else ''}'",
+            link=f"/foro/",
+            tipo="reclamo_comentario"
+        )
     return JsonResponse({'success': True, 'message': 'Respuesta publicada', 'comentario_id': comentario.id})
 
 @login_required
@@ -1394,6 +1495,15 @@ def asignar_reclamo(request, reclamo_id):
     users = User.objects.filter(id__in=asignados)
     reclamo.asignados.set(users)
     reclamo.save()
+    # --- NOTIFICAR A LOS USUARIOS ASIGNADOS ---
+    for usuario in users:
+        Notification.objects.create(
+            usuario=usuario,
+            mensaje=f"{request.user.get_full_name() or request.user.username} te ha asignado al reclamo: {reclamo.titulo}",
+            link=f"/foro/",
+            tipo="reclamo_estado"
+        )
+    # --- FIN NOTIFICACION ---
     return JsonResponse({'success': True, 'message': 'Usuarios asignados'})
 
 @login_required
@@ -1410,3 +1520,41 @@ def estados_reclamo(request):
     from .models import Reclamo
     estados = [{'value': e[0], 'display': e[1]} for e in Reclamo.ESTADOS]
     return JsonResponse({'estados': estados})
+
+# --- ENDPOINTS DE NOTIFICACIONES ---
+@login_required
+@require_GET
+def notificaciones_usuario(request):
+    """
+    Devuelve las notificaciones no leídas y recientes del usuario autenticado.
+    """
+    notificaciones = Notification.objects.filter(usuario=request.user).order_by('-fecha')[:20]
+    data = [
+        {
+            'id': n.id,
+            'mensaje': n.mensaje,
+            'link': n.link,
+            'leido': n.leido,
+            'fecha': n.fecha.strftime('%d/%m/%Y %H:%M'),
+            'tipo': n.tipo,
+        }
+        for n in notificaciones
+    ]
+    return JsonResponse({'notificaciones': data})
+
+@login_required
+@require_POST
+def marcar_notificacion_leida(request, notificacion_id):
+    """
+    Marca una notificación como leída.
+    """
+    n = get_object_or_404(Notification, id=notificacion_id, usuario=request.user)
+    n.leido = True
+    n.save(update_fields=['leido'])
+    return JsonResponse({'success': True})
+
+@login_required
+@require_POST
+def marcar_todas_notificaciones_leidas(request):
+    Notification.objects.filter(usuario=request.user, leido=False).update(leido=True)
+    return JsonResponse({'success': True})

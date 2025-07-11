@@ -247,6 +247,111 @@ header {
     color:#4070B7;
 }
 
+/* Notificaciones estilo X */
+.notifications-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    margin-right: 32px;
+}
+#notification-bell {
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    padding: 0;
+}
+#notification-bell i.fas.fa-bell {
+    color: #fff !important;
+    font-size: 1.5rem;
+    transition: color 0.2s;
+}
+#notification-bell:hover i.fas.fa-bell {
+    color: #1d9bf0 !important;
+}
+#notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #1d9bf0;
+    color: #fff;
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    border-radius: 999px;
+    display: none;
+    box-shadow: 0 2px 8px rgba(29,155,240,0.18);
+    font-weight: 700;
+    border: 2px solid #fff;
+}
+#notification-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 36px;
+    width: 370px;
+    max-height: 480px;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    z-index: 1001;
+    padding: 0;
+    border: 1.5px solid #e6ecf0;
+    animation: fadeInNotif 0.18s;
+}
+@keyframes fadeInNotif {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+#notification-dropdown > div[style*='position:absolute'] {
+    /* Triángulo arriba */
+    pointer-events: none;
+}
+#notification-list {
+    padding: 0;
+}
+.notification-item {
+    padding: 16px 22px 14px 18px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.18s;
+    position: relative;
+}
+.notification-item.unread {
+    background: #f7fafd;
+    border-left: 4px solid #1d9bf0;
+    border-radius: 0 12px 12px 0;
+}
+.notification-item:hover {
+    background: #f0f4f8;
+}
+.notification-item .notif-main {
+    font-size: 1.04rem;
+    color: #222;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+.notification-item .notif-date {
+    font-size: 0.89rem;
+    color: #8899a6;
+    margin-top: 2px;
+    font-weight: 400;
+}
+@media (max-width: 480px) {
+    #notification-dropdown {
+        width: 98vw;
+        min-width: 0;
+        left: 0;
+        right: 0;
+        border-radius: 0 0 18px 18px;
+    }
+}
+
 @media (max-width: 1024px) {
     .menu {
         width: 30%;

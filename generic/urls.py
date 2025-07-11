@@ -101,6 +101,9 @@ urlpatterns = [
     path("foro/reclamos/estados/", views.estados_reclamo, name="estados_reclamo"),
     path("foro/reclamos/comentario/<int:comentario_id>/responder/", views.responder_comentario_reclamo, name="responder_comentario_reclamo"),
     path("foro/reclamos/comentario/<int:comentario_id>/eliminar/", views.eliminar_comentario_reclamo, name="eliminar_comentario_reclamo"),
+    path("notificaciones/", views.notificaciones_usuario, name="notificaciones_usuario"),
+    path("notificaciones/<int:notificacion_id>/leer/", views.marcar_notificacion_leida, name="marcar_notificacion_leida"),
+    path("notificaciones/marcar-todas-leidas/", views.marcar_todas_notificaciones_leidas, name="marcar_todas_notificaciones_leidas"),
 ]
 
 if settings.DEBUG:

@@ -70,7 +70,7 @@
                     
                     <div class="publications-list">
                         {% for publicacion in publicaciones %}
-                        <article class="publication-item" data-publication-id="{{ publicacion.id }}">
+                        <article class="publication-item" data-publication-id="{{ publicacion.id }}" id="publicacion-{{ publicacion.id }}">
                             <div class="publication-header">
                                 <div class="user-info">
                                     <img src="/static/images/userProfile.jpg" alt="Usuario" class="avatar-img">

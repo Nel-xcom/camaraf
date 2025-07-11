@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
+from django.utils import timezone
 
 class Farmacia(models.Model):
     codigo_farmacia = models.CharField(max_length=20, help_text="Código de la farmacia", default="F000")
@@ -775,3 +776,25 @@ class ReclamoComment(models.Model):
         if self.is_deleted:
             return f"[Eliminado]"
         return f"{self.usuario.username} → {self.reclamo} - {self.fecha_comentario.strftime('%d/%m/%Y %H:%M')}"
+
+class Notification(models.Model):
+    """
+    Notificación interna para usuarios (foro, reclamos, etc)
+    """
+    TIPOS = [
+        ("reclamo_estado", "Cambio de estado de reclamo"),
+        ("reclamo_comentario", "Nuevo comentario en reclamo"),
+        ("foro", "Notificación de foro"),
+    ]
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notificaciones")
+    mensaje = models.CharField(max_length=255)
+    link = models.CharField(max_length=255, blank=True, null=True)
+    leido = models.BooleanField(default=False)
+    fecha = models.DateTimeField(default=timezone.now)
+    tipo = models.CharField(max_length=32, choices=TIPOS, default="foro")
+
+    class Meta:
+        ordering = ["-fecha"]
+
+    def __str__(self):
+        return f"Notificación para {self.usuario}: {self.mensaje[:40]}..."
