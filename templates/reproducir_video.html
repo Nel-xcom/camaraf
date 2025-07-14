@@ -1,0 +1,244 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ video.titulo }} - Reproducir Video</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .main-layout {
+            display: flex;
+            max-width: 100%;
+            gap: 32px;
+            margin: 0 auto;
+            padding: 32px 15px 32px 150px;
+        }
+        .left-col {
+            flex: 0 1 auto;
+            width: 67%;
+        }
+        .right-col {
+            flex: 0 0 auto;
+            width: 30%;
+        }
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #4285f4;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 18px;
+            font-size: 1.05em;
+        }
+        .back-button:hover { color: #3367d6; }
+        .video-player-container {
+            background: #000;
+            border-radius: 14px;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+        .video-player {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            display: block;
+        }
+        .video-info-box {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            padding: 24px 24px 18px 24px;
+            margin-bottom: 18px;
+        }
+        .video-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .video-title {
+            font-size: 1.45em;
+            font-weight: 700;
+            color: #222222;
+            flex: 1 1 0%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .video-views {
+            color: #666;
+            font-size: 1em;
+            font-weight: 500;
+            margin-left: 12px;
+            white-space: nowrap;
+        }
+        .video-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .video-creator {
+            color: #666;
+            font-size: 1.05em;
+            font-weight: 500;
+        }
+        .video-date {
+            color: #666;
+            font-size: 1em;
+        }
+        .video-extra-box {
+            margin-left: auto;
+            display: flex;
+            gap: 18px;
+            align-items: center;
+        }
+        .video-extra-item {
+            color: #666;
+            font-size: 1em;
+            background: #f3f3f3;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-weight: 500;
+        }
+        .video-list {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            padding: 18px 0 18px 0;
+            max-height: 900px;
+            overflow-y: auto;
+        }
+        .video-list-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #222;
+            margin-left: 24px;
+            margin-bottom: 10px;
+        }
+        .video-list-item {
+            min-height: 120px;
+            gap: 16px;
+            padding: 12px 24px;
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.13s;
+        }
+        .video-list-item:last-child { border-bottom: none; }
+        .video-list-item:hover { background: #f7f7f7; }
+        .video-list-thumb {
+            width: 196px;
+            height: 110px;
+            border-radius: 7px;
+            object-fit: cover;
+            background: #222;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .video-list-info {
+            flex: 1 1 0%;
+            min-width: 0;
+        }
+        .video-list-title2 {
+            font-size: 1em;
+            font-weight: 600;
+            color: #222;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+        .video-list-creator {
+            color: #666;
+            font-size: 0.97em;
+            margin-bottom: 2px;
+        }
+        .video-list-meta {
+            color: #666;
+            font-size: 0.93em;
+        }
+        .video-list-duration {
+            position: absolute;
+            bottom: 4px;
+            right: 6px;
+            background: rgba(34,34,34,0.85);
+            color: #fff;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.93em;
+            font-weight: 600;
+        }
+        /* Se eliminaron los estilos personalizados de los controles de video, vuelve al diseño original del navegador */
+        @media (max-width: 1200px) {
+            .main-layout { flex-direction: column; }
+            .left-col, .right-col { max-width: 100%; min-width: 0; }
+            .right-col { margin-top: 32px; }
+        }
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+    <div class="main-layout">
+        <div class="left-col">
+            <a href="{% url 'guias_uso' %}" class="back-button">
+                <i class="fas fa-arrow-left"></i> Volver a Guías de uso
+            </a>
+            <div class="video-player-container">
+                <video class="video-player" controls>
+                    <source src="{{ video.archivo_video.url }}" type="video/mp4">
+                    Tu navegador no soporta el elemento de video.
+                </video>
+            </div>
+            <div class="video-info-box">
+                <div class="video-title-row">
+                    <div class="video-title">{{ video.titulo }}</div>
+                    <div class="video-views"><i class="fas fa-eye"></i> {{ video.visualizaciones }} vistas</div>
+                </div>
+                <div class="video-meta-row">
+                    <div class="video-creator"><i class="fas fa-user"></i> {{ video.usuario.username }}</div>
+                    <div class="video-date"><i class="fas fa-calendar"></i> {{ video.fecha_subida|date:"d/m/Y" }}</div>
+                    <div class="video-extra-box">
+                        <div class="video-extra-item"><i class="fas fa-tag"></i> {{ video.get_categoria_display }}</div>
+                        <div class="video-extra-item"><i class="fas fa-hdd"></i> {{ video.get_tamanio_formateado }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="right-col">
+            <div class="video-list">
+                <div class="video-list-title">Videos</div>
+                {% for v in videos_list %}
+                <a href="{% url 'reproducir_video' v.id %}" class="video-list-item" style="text-decoration:none;">
+                    <div style="position:relative;">
+                        {% if v.thumbnail %}
+                        <img src="{{ v.thumbnail.url }}" class="video-list-thumb" alt="{{ v.titulo }}">
+                        {% else %}
+                        <div class="video-list-thumb" style="background:#222;"></div>
+                        {% endif %}
+                        <div class="video-list-duration">{{ v.get_duracion_formateada }}</div>
+                    </div>
+                    <div class="video-list-info">
+                        <div class="video-list-title2">{{ v.titulo }}</div>
+                        <div class="video-list-creator">{{ v.usuario.username }}</div>
+                        <div class="video-list-meta">{{ v.visualizaciones }} vistas &bull; {{ v.fecha_subida|date:"d/m/Y" }}</div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

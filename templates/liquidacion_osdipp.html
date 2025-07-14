@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquidación de OSDIPP</title>
+    <link rel="stylesheet" href="{% static 'css/liquidacion.css' %}">
+</head>
+<body>
+    {% include 'header.html' %}
+    <div class="container">
+        {% include 'timeline2.html' with step=2 %}
+        <h1>Cargar liquidación de OSDIPP (PDF)</h1>
+        <form method="post" enctype="multipart/form-data" class="upload-form">
+            {% csrf_token %}
+            <label for="fileInput" class="custom-file-label">
+              <i class="fas fa-plus"></i> Cargar liquidación PDF
+            </label>
+            <input type="file" name="archivo" id="fileInput" class="file-input" required accept="application/pdf">
+            <button type="submit" class="submit-button">
+              Subir archivo
+            </button>
+        </form>
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <div class="main-files-cont">
+            <div class="search-files-container">
+                <div class="search-input-wrapper">
+                  <input type="text" id="searchFiles" placeholder="Buscar liquidación...">
+                  <i class="fas fa-search search-icon"></i>
+                </div>
+            </div>
+            <div class="grid-table-container">
+                {% for archivo in archivos_disponibles %}
+                <div class="file-card" data-archivo="{{ archivo }}">
+                    <div class="file-icon-distribution">
+                        <i class="fas fa-file-pdf file-icon"></i>
+                        <span class="file-name" title="{{ archivo }}">
+                            {{ archivo }}
+                        </span>
+                        <input type="text" class="edit-input" style="display: none;" value="{{ archivo }}">
+                    </div>
+                    <div class="file-preview"></div>
+                    <i class="fas fa-ellipsis-v file-options"></i>
+                    <div class="context-menu">
+                        <div class="menu-item"><i class="fas fa-download"></i> Descargar</div>
+                        <div class="menu-item editar-btn"><i class="fas fa-pen"></i> Editar título</div>
+                        <div class="menu-item eliminar-btn"><i class="fas fa-trash"></i> Eliminar</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Si tienes lógica JS específica para OSDIPP, inclúyela aquí -->
+</body>
+</html> 

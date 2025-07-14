@@ -1,0 +1,345 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subir Archivo - Guías de uso</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .upload-form {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+        }
+
+        .form-control.error {
+            border-color: #dc3545;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .file-upload-area {
+            border: 3px dashed #e0e0e0;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-upload-area:hover {
+            border-color: #4285f4;
+            background-color: #f8f9ff;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #4285f4;
+            background-color: #f0f4ff;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #4285f4;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #4285f4;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3367d6;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #4285f4;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .upload-form {
+                padding: 25px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Subir Archivo</h1>
+            <p class="page-subtitle">Comparte manuales y documentos con la comunidad</p>
+        </div>
+
+        <div class="upload-form">
+            <form method="post" enctype="multipart/form-data" id="archivo-form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="{{ form.titulo.id_for_label }}" class="form-label">Título del archivo *</label>
+                    {{ form.titulo }}
+                    {% if form.titulo.errors %}
+                        <div class="error-message">{{ form.titulo.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.descripcion.id_for_label }}" class="form-label">Descripción</label>
+                    {{ form.descripcion }}
+                    {% if form.descripcion.errors %}
+                        <div class="error-message">{{ form.descripcion.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.categoria.id_for_label }}" class="form-label">Categoría *</label>
+                    {{ form.categoria }}
+                    {% if form.categoria.errors %}
+                        <div class="error-message">{{ form.categoria.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.estado.id_for_label }}" class="form-label">Estado *</label>
+                    {{ form.estado }}
+                    {% if form.estado.errors %}
+                        <div class="error-message">{{ form.estado.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.archivo.id_for_label }}" class="form-label">Archivo *</label>
+                    <div class="file-upload-area" id="archivo-upload-area">
+                        <div class="upload-icon">
+                            <i class="fas fa-file"></i>
+                        </div>
+                        <div class="upload-text">Arrastra tu archivo aquí o haz clic para seleccionar</div>
+                        <div class="upload-hint">Formatos soportados: PDF, Word, Excel, PowerPoint, TXT (máx. 50MB)</div>
+                        {{ form.archivo }}
+                    </div>
+                    {% if form.archivo.errors %}
+                        <div class="error-message">{{ form.archivo.errors.0 }}</div>
+                    {% endif %}
+                    <div class="progress-bar" id="archivo-progress" style="display: none;">
+                        <div class="progress-fill" id="archivo-progress-fill"></div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Subir Archivo
+                    </button>
+                    <a href="{% url 'guias_uso' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Funcionalidad de drag and drop
+        const archivoUploadArea = document.getElementById('archivo-upload-area');
+        const archivoInput = document.querySelector('input[name="archivo"]');
+
+        function setupDragAndDrop(area, input) {
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.classList.add('dragover');
+            });
+
+            area.addEventListener('dragleave', () => {
+                area.classList.remove('dragover');
+            });
+
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    input.files = files;
+                    updateFileInfo(area, files[0]);
+                }
+            });
+
+            area.addEventListener('click', () => {
+                input.click();
+            });
+
+            input.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    updateFileInfo(area, e.target.files[0]);
+                }
+            });
+        }
+
+        function updateFileInfo(area, file) {
+            const uploadText = area.querySelector('.upload-text');
+            uploadText.textContent = `Archivo seleccionado: ${file.name}`;
+        }
+
+        setupDragAndDrop(archivoUploadArea, archivoInput);
+
+        // Validación del formulario
+        const form = document.getElementById('archivo-form');
+        form.addEventListener('submit', (e) => {
+            const titulo = document.querySelector('input[name="titulo"]').value.trim();
+            const archivo = document.querySelector('input[name="archivo"]').files[0];
+
+            if (!titulo) {
+                e.preventDefault();
+                alert('Por favor, ingresa un título para el archivo.');
+                return;
+            }
+
+            if (!archivo) {
+                e.preventDefault();
+                alert('Por favor, selecciona un archivo.');
+                return;
+            }
+        });
+    </script>
+</body>
+</html> 
