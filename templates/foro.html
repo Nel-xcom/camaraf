@@ -82,7 +82,7 @@
                                 <div class="publication-actions">
                                     <span class="category-badge {{ publicacion.categoria }}">{{ publicacion.get_categoria_display }}</span>
                                     {% if publicacion.usuario_creacion == request.user %}
-                                    <button class="delete-btn" title="Eliminar publicación" onclick="eliminarPublicacion({{ publicacion.id }})">
+                                    <button class="delete-btn" title="Eliminar publicación" data-publication-id="{{ publicacion.id }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                     {% endif %}
@@ -114,12 +114,12 @@
                                 
                                 <!-- Botones de interacción -->
                                 <div class="publication-interactions">
-                                    <button class="interaction-btn comment-btn" onclick="mostrarComentarios({{ publicacion.id }})">
+                                    <button class="interaction-btn comment-btn" data-publication-id="{{ publicacion.id }}">
                                         <i class="far fa-comment"></i>
                                         <span class="interaction-count">{{ publicacion.comentarios_count }}</span>
                                     </button>
                                     <button class="interaction-btn like-btn {% if publicacion.user_has_liked %}liked{% endif %}" 
-                                            onclick="toggleLike({{ publicacion.id }})">
+                                            data-publication-id="{{ publicacion.id }}">
                                         <i class="{% if publicacion.user_has_liked %}fas{% else %}far{% endif %} fa-heart"></i>
                                         <span class="interaction-count">{{ publicacion.likes_count }}</span>
                                     </button>
@@ -136,16 +136,32 @@
             </div>
 
             <!-- Aside: Contenedor de Reclamos -->
-            <aside class="complaints-container">
-                <div class="complaints-header">
-                    <h2 class="complaints-title">Reclamos</h2>
-                    <button class="new-complaint-btn" onclick="abrirModalReclamo()">
-                        <i class="fas fa-plus"></i>
-                        Nueva solicitud
-                    </button>
+            <aside class="aside-container">
+                <div class="complaints-container">
+                    <div class="complaints-header">
+                        <h2 class="complaints-title">Reclamos pendientes y en progreso</h2>
+                        <button class="new-complaint-btn" id="new-complaint-btn">
+                            <i class="fas fa-plus"></i>
+                            Nueva solicitud
+                        </button>
+                    </div>
+                    <div class="complaints-list" id="complaints-list">
+                        <!-- Reclamos dinámicos -->
+                    </div>
                 </div>
-                <div class="complaints-list" id="complaints-list">
-                    <!-- Reclamos dinámicos -->
+
+                <!-- Aside: Contenedor de Reclamos Resueltos -->
+                <div class="complaints-container resolved-complaints-container">
+                    <div class="complaints-header">
+                        <h2 class="complaints-title">Reclamos resueltos</h2>
+                    </div>
+                    <div class="search-container">
+                        <input type="text" id="search-resolved-complaints" class="search-input" placeholder="Buscar reclamos resueltos...">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    <div class="complaints-list" id="resolved-complaints-list">
+                        <!-- Reclamos resueltos dinámicos -->
+                    </div>
                 </div>
             </aside>
         </div>
@@ -224,63 +240,78 @@
     </div>
 
     <!-- Modal de reclamo interactivo -->
-    <div id="complaint-modal" class="comment-modal complaint-x-modal" style="display:none;">
-        <div class="comment-modal-backdrop" onclick="closeComplaintModal()"></div>
-        <div class="comment-modal-content complaint-x-modal-content" style="width:1100px;max-width:98vw;max-height:80vh;background:#fff;border-radius:22px;box-shadow:0 4px 32px rgba(0,0,0,0.18);padding:0;overflow:hidden;display:flex;flex-direction:column;">
-            <div style="padding:0 0 0 0;position:relative;flex-shrink:0;">
-                <button class="comment-modal-close" onclick="closeComplaintModal()" title="Cerrar" style="position:absolute;top:18px;right:18px;background:transparent;border:none;font-size:1.3rem;color:#555;z-index:2;">
+    <div id="complaint-modal" class="complaint-modal" style="display:none;">
+        <div class="complaint-modal-backdrop" onclick="closeComplaintModal()"></div>
+        <div class="complaint-modal-content">
+            <!-- Header -->
+            <div class="complaint-modal-header">
+                <button class="complaint-modal-close" onclick="closeComplaintModal()" title="Cerrar">
                     <i class="fas fa-times"></i>
                 </button>
-                <div class="complaint-modal-header" style="padding:28px 40px 10px 40px;border-bottom:1px solid #f0f0f0;display:flex;flex-direction:column;gap:6px;">
-                    <h2 id="complaint-modal-title" style="font-size:1.35rem;font-weight:700;margin:0;color:#222;">Reclamo</h2>
-                    <div class="complaint-modal-meta" style="font-size:0.98rem;color:#888;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-                        <span id="complaint-modal-creator"></span>
-                        <span id="complaint-modal-date"></span>
-                        <span id="complaint-modal-status" style="font-weight:600;"></span>
+                <div class="complaint-modal-title-section">
+                    <h2 id="complaint-modal-title" class="complaint-modal-title">Reclamo</h2>
+                    <div class="complaint-modal-meta">
+                        <span id="complaint-modal-creator" class="complaint-modal-creator"></span>
+                        <span class="complaint-modal-separator">•</span>
+                        <span id="complaint-modal-date" class="complaint-modal-date"></span>
+                        <span class="complaint-modal-separator">•</span>
+                        <span id="complaint-modal-status" class="complaint-modal-status"></span>
                     </div>
                 </div>
             </div>
-            <div style="overflow-y:auto;flex:1;display:flex;flex-direction:column;">
-                <div style="padding:18px 40px 0 40px;display:grid;grid-template-columns:1fr 1fr;gap:32px 32px;align-items:start;">
-                    <div style="grid-column:1/2;">
-                        <div class="complaint-modal-description" id="complaint-modal-description" style="font-size:1.08rem;color:#222;margin-bottom:10px;"></div>
-                        <div class="complaint-modal-attachments" id="complaint-modal-attachments" style="margin-bottom:10px;"></div>
+
+            <!-- Content -->
+            <div class="complaint-modal-body">
+                <!-- Main content -->
+                <div class="complaint-modal-main">
+                    <div class="complaint-modal-description-section">
+                        <div id="complaint-modal-description" class="complaint-modal-description"></div>
+                        <div id="complaint-modal-attachments" class="complaint-modal-attachments"></div>
+                        
+                        <!-- Comments section -->
+                        <div class="complaint-modal-comments">
+                            <div id="complaint-comments-list" class="complaint-comments-list"></div>
+                            
+                            <form id="complaint-comment-form" enctype="multipart/form-data" class="complaint-comment-form">
+                                {% csrf_token %}
+                                <div class="complaint-comment-input-container">
+                                    <textarea name="contenido" id="complaint-comment-input" class="complaint-comment-input" placeholder="Escribe un comentario..." required></textarea>
+                                    <div class="complaint-comment-actions">
+                                        <div class="complaint-comment-files">
+                                            <label class="complaint-file-input">
+                                                <i class="fas fa-image"></i>
+                                                <input type="file" name="imagen" class="file-input" accept="image/*" hidden>
+                                                <span>Imagen</span>
+                                            </label>
+                                            <label class="complaint-file-input">
+                                                <i class="fas fa-file"></i>
+                                                <input type="file" name="archivo" class="file-input" accept=".pdf,.doc,.docx,.xls,.xlsx" hidden>
+                                                <span>Archivo</span>
+                                            </label>
+                                        </div>
+                                        <button type="submit" class="complaint-comment-btn">Comentar</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div style="grid-column:2/3;display:flex;flex-direction:column;gap:12px;">
-                        <form id="complaint-assign-form" style="margin-bottom:0;display:flex;flex-direction:column;gap:6px;background:#f7fafd;padding:12px 16px;border-radius:12px;">
-                            <label style="font-size:0.98rem;color:#555;font-weight:500;">Asignar a usuarios:</label>
-                            <select id="complaint-assign-users" name="asignados" multiple style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid #e0e0e0;background:#fafbfc;font-size:1rem;margin-bottom:8px;min-height:60px;"></select>
-                            <button type="submit" class="post-btn" style="background:#1d9bf0;color:#fff;border:none;border-radius:999px;padding:8px 0;font-weight:600;font-size:1rem;transition:background 0.2s;">Asignar</button>
+                    
+                    <!-- Actions sidebar -->
+                    <div class="complaint-modal-actions">
+                        <form id="complaint-assign-form" class="complaint-action-form">
+                            <label class="complaint-action-label">Asignar usuarios</label>
+                            <select id="complaint-assign-users" name="asignados" multiple class="complaint-action-select"></select>
+                            <button type="submit" class="complaint-action-btn">Asignar</button>
                         </form>
-                        <form id="complaint-status-form" style="margin-bottom:0;display:flex;flex-direction:column;gap:6px;background:#f7fafd;padding:12px 16px;border-radius:12px;">
-                            <label for="complaint-status-select" style="font-size:0.98rem;color:#555;font-weight:500;">Estado:</label>
-                            <select id="complaint-status-select" name="estado" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid #e0e0e0;background:#fafbfc;font-size:1rem;margin-bottom:8px;"></select>
-                            <button type="submit" class="post-btn" style="background:#1d9bf0;color:#fff;border:none;border-radius:999px;padding:8px 0;font-weight:600;font-size:1rem;transition:background 0.2s;">Cambiar estado</button>
+                        
+                        <form id="complaint-status-form" class="complaint-action-form">
+                            <label for="complaint-status-select" class="complaint-action-label">Estado</label>
+                            <select id="complaint-status-select" name="estado" class="complaint-action-select"></select>
+                            <button type="submit" class="complaint-action-btn">Cambiar estado</button>
                         </form>
                     </div>
                 </div>
-                <div id="complaint-comments-list" class="modal-comments-list" style="padding:18px 40px 0 40px;"></div>
             </div>
-            
-            <form id="complaint-comment-form" enctype="multipart/form-data" class="modal-comment-form" style="padding:18px 40px 18px 40px;display:flex;flex-direction:column;gap:8px;border-top:1px solid #f0f0f0;background:#fff;flex-shrink:0;">
-                {% csrf_token %}
-                <textarea name="contenido" id="complaint-comment-input" class="modal-comment-input" placeholder="Escribe un comentario..." required style="border-radius:12px;border:1px solid #e0e0e0;padding:10px 12px;font-size:1.05rem;min-height:60px;background:#fafbfc;"></textarea>
-                <div class="modal-comment-files" style="display:flex;gap:16px;align-items:center;">
-                    <label class="file-input-label" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.98rem;color:#1d9bf0;font-weight:500;">
-                        <i class="fas fa-image"></i>
-                        <input type="file" name="imagen" class="file-input" accept="image/*" hidden>
-                        <span>Imagen</span>
-                    </label>
-                    <label class="file-input-label" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.98rem;color:#1d9bf0;font-weight:500;">
-                        <i class="fas fa-file"></i>
-                        <input type="file" name="archivo" class="file-input" accept=".pdf,.doc,.docx,.xls,.xlsx" hidden>
-                        <span>Archivo</span>
-                    </label>
-                </div>
-                <div class="modal-comment-actions" style="display:flex;justify-content:flex-end;">
-                    <button type="submit" class="post-btn" style="background:#1d9bf0;color:#fff;border:none;border-radius:999px;padding:8px 32px;font-weight:600;font-size:1rem;transition:background 0.2s;">Comentar</button>
-                </div>
-            </form>
         </div>
     </div>
 

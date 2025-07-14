@@ -458,7 +458,49 @@ document.addEventListener('DOMContentLoaded', function() {
     publications.forEach((pub, index) => {
         setTimeout(() => animatePublication(pub), index * 100);
     });
-}); 
+    
+    // Inicializar event listeners para botones de publicaciones
+    setupPublicationEventListeners();
+});
+
+// Configurar event listeners para botones de publicaciones
+function setupPublicationEventListeners() {
+    // Botones de eliminar publicación
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const publicationId = this.getAttribute('data-publication-id');
+            if (publicationId) {
+                eliminarPublicacion(parseInt(publicationId));
+            }
+        });
+    });
+    
+    // Botones de comentarios
+    document.querySelectorAll('.comment-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const publicationId = this.getAttribute('data-publication-id');
+            if (publicationId) {
+                mostrarComentarios(parseInt(publicationId));
+            }
+        });
+    });
+    
+    // Botones de like
+    document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const publicationId = this.getAttribute('data-publication-id');
+            if (publicationId) {
+                toggleLike(parseInt(publicationId));
+            }
+        });
+    });
+    
+    // Botón de nueva solicitud
+    const newComplaintBtn = document.getElementById('new-complaint-btn');
+    if (newComplaintBtn) {
+        newComplaintBtn.addEventListener('click', abrirModalReclamo);
+    }
+} 
 
 // Reclamos: abrir/cerrar modal
 function abrirModalReclamo() {
@@ -526,12 +568,19 @@ async function cargarReclamosAside() {
 
 // Renderiza un reclamo en el aside
 function renderReclamoAside(r) {
+    // Preparar información de usuarios asignados
+    let asignadosHtml = '';
+    if (r.usuarios_asignados && r.usuarios_asignados.length > 0) {
+        asignadosHtml = `<span class="complaint-assigned">Asignado: ${r.usuarios_asignados.join(', ')}</span>`;
+    }
+    
     return `
     <article class="complaint-item" data-reclamo-id="${r.id}">
         <div class="complaint-header">
             <div class="complaint-user-info">
-                <span class="complaint-creator">${r.usuario_creador}</span>
-                <span class="complaint-date">${r.fecha_creacion}</span>
+                <span class="complaint-creator">Creador: ${r.usuario_creador}</span>
+                ${asignadosHtml}
+                <span class="complaint-time">${r.tiempo_transcurrido}</span>
             </div>
             <div class="complaint-actions">
                 <button class="complaint-btn solved-btn${r.estado === 'Resuelto' ? ' solved' : ''}" title="Marcar como solucionado" onclick="marcarReclamoResuelto(${r.id})">
@@ -546,8 +595,8 @@ function renderReclamoAside(r) {
             </div>
         </div>
         <div class="complaint-content">
-            <h3 class="complaint-title">${r.titulo}</h3>
-            <p class="complaint-description">${r.descripcion}</p>
+            <h3 class="complaint-title">Titulo del reclamo: ${r.titulo}</h3>
+            <p class="complaint-description">Descripcion: ${r.descripcion}</p>
         </div>
         <div class="complaint-update">
             <span class="update-info">Última modificación: ${r.ultima_actualizacion_por || r.usuario_creador} · ${r.estado}</span>
@@ -573,7 +622,11 @@ async function cambiarEstadoReclamo(id, estado) {
         const data = await response.json();
         if (data.success) {
             showNotification('Estado actualizado', 'success');
-            cargarReclamosAside();
+            // Recargar reclamos y reconfigurar listeners
+            await cargarReclamosAside();
+            setTimeout(() => {
+                setupComplaintModalClicks();
+            }, 100);
         } else {
             showNotification(data.error || 'Error al actualizar estado', 'error');
         }
@@ -594,7 +647,11 @@ async function eliminarReclamo(id) {
         const data = await response.json();
         if (data.success) {
             showNotification('Reclamo eliminado', 'success');
-            cargarReclamosAside();
+            // Recargar reclamos y reconfigurar listeners
+            await cargarReclamosAside();
+            setTimeout(() => {
+                setupComplaintModalClicks();
+            }, 100);
         } else {
             showNotification(data.error || 'Error al eliminar', 'error');
         }
@@ -626,6 +683,75 @@ async function toggleNotificacionesReclamo(id) {
 // Inicializar reclamos al cargar la página
 if (document.getElementById('complaints-list')) {
     cargarReclamosAside();
+}
+
+// Inicializar reclamos resueltos al cargar la página
+if (document.getElementById('resolved-complaints-list')) {
+    cargarReclamosResueltosAside();
+    setupResolvedComplaintsSearch();
+}
+
+// Cargar reclamos resueltos en el aside
+async function cargarReclamosResueltosAside(query = '') {
+    const list = document.getElementById('resolved-complaints-list');
+    if (!list) return;
+    
+    list.innerHTML = '<div style="text-align:center;color:#888;">Cargando reclamos resueltos...</div>';
+    try {
+        const url = query ? `/foro/reclamos/resueltos/?q=${encodeURIComponent(query)}` : '/foro/reclamos/resueltos/';
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.reclamos && data.reclamos.length > 0) {
+            list.innerHTML = data.reclamos.map(r => renderReclamoResueltoAside(r)).join('');
+        } else {
+            list.innerHTML = '<div style="text-align:center;color:#888;">No hay reclamos resueltos.</div>';
+        }
+    } catch (error) {
+        list.innerHTML = '<div style="text-align:center;color:#e0245e;">Error al cargar reclamos resueltos</div>';
+    }
+}
+
+// Renderiza un reclamo resuelto en el aside
+function renderReclamoResueltoAside(r) {
+    // Preparar información de usuarios asignados
+    let asignadosHtml = '';
+    if (r.usuarios_asignados && r.usuarios_asignados.length > 0) {
+        asignadosHtml = `<span class="complaint-assigned">Asignado: ${r.usuarios_asignados.join(', ')}</span>`;
+    }
+    
+    return `
+    <article class="complaint-item resolved-complaint-item" data-reclamo-id="${r.id}">
+        <div class="complaint-header">
+            <div class="complaint-user-info">
+                <span class="complaint-creator">Creador: ${r.usuario_creador}</span>
+                ${asignadosHtml}
+                <span class="complaint-time">${r.tiempo_transcurrido}</span>
+            </div>
+        </div>
+        <div class="complaint-content">
+            <h3 class="complaint-title">Titulo del reclamo: ${r.titulo}</h3>
+            <p class="complaint-description">Descripcion: ${r.descripcion}</p>
+        </div>
+        <div class="complaint-update">
+            <span class="update-info">Estado: ${r.estado}</span>
+        </div>
+    </article>
+    `;
+}
+
+// Configurar búsqueda de reclamos resueltos
+function setupResolvedComplaintsSearch() {
+    const searchInput = document.getElementById('search-resolved-complaints');
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            searchTimeout = setTimeout(() => {
+                cargarReclamosResueltosAside(query);
+            }, 300);
+        });
+    }
 } 
 
 // --- MODAL DE RECLAMO INTERACTIVO ---
@@ -633,20 +759,33 @@ let currentComplaintId = null;
 
 // Abrir modal de reclamo al hacer click en un reclamo del aside
 function setupComplaintModalClicks() {
-    const complaintItems = document.querySelectorAll('.complaint-item');
-    complaintItems.forEach(item => {
-        item.addEventListener('click', function(e) {
-            // Evitar que los botones internos (eliminar, notificaciones, etc) abran el modal
-            if (e.target.closest('.complaint-actions')) return;
-            const complaintId = this.getAttribute('data-reclamo-id');
-            openComplaintModal(complaintId);
-        });
+    // Remover listeners existentes para evitar duplicados
+    document.querySelectorAll('.complaint-item').forEach(item => {
+        item.removeEventListener('click', handleComplaintClick);
+    });
+    
+    // Agregar nuevos listeners
+    document.querySelectorAll('.complaint-item').forEach(item => {
+        item.addEventListener('click', handleComplaintClick);
     });
 }
 
+function handleComplaintClick(e) {
+    // Evitar que los botones internos (eliminar, notificaciones, etc) abran el modal
+    if (e.target.closest('.complaint-actions')) return;
+    const complaintId = this.getAttribute('data-reclamo-id');
+    openComplaintModal(complaintId);
+}
+
 async function openComplaintModal(complaintId) {
+    if (!complaintId) return;
+    
     currentComplaintId = complaintId;
+    
     // Limpiar campos
+    const modal = document.getElementById('complaint-modal');
+    if (!modal) return;
+    
     document.getElementById('complaint-modal-title').textContent = 'Reclamo';
     document.getElementById('complaint-modal-creator').textContent = '';
     document.getElementById('complaint-modal-date').textContent = '';
@@ -655,17 +794,30 @@ async function openComplaintModal(complaintId) {
     document.getElementById('complaint-modal-attachments').innerHTML = '';
     document.getElementById('complaint-comments-list').innerHTML = '<div style="text-align:center;color:#888;">Cargando comentarios...</div>';
     document.getElementById('complaint-comment-form').reset();
+    
     // Mostrar modal
-    document.getElementById('complaint-modal').style.display = 'block';
-    // Cargar datos del reclamo
-    await cargarDatosReclamo(complaintId);
-    await cargarComentariosReclamo(complaintId);
-    await cargarUsuariosAsignables(complaintId);
-    await cargarEstadosReclamo(complaintId);
+    modal.style.display = 'block';
+    
+    try {
+        // Cargar datos del reclamo
+        await cargarDatosReclamo(complaintId);
+        await cargarComentariosReclamo(complaintId);
+        await cargarUsuariosAsignables(complaintId);
+        await cargarEstadosReclamo(complaintId);
+        
+        // Inicializar formularios del modal
+        setupComplaintModalForms();
+    } catch (error) {
+        console.error('Error al cargar datos del reclamo:', error);
+        showNotification('Error al cargar el reclamo', 'error');
+    }
 }
 
 function closeComplaintModal() {
-    document.getElementById('complaint-modal').style.display = 'none';
+    const modal = document.getElementById('complaint-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
     currentComplaintId = null;
 }
 
@@ -860,113 +1012,170 @@ async function cargarEstadosReclamo(complaintId) {
     }
 }
 
-// Enviar comentario
-const complaintCommentForm = document.getElementById('complaint-comment-form');
-if (complaintCommentForm) {
-    complaintCommentForm.addEventListener('submit', async function(event) {
-        event.preventDefault();
-        if (!currentComplaintId) return;
-        const formData = new FormData(complaintCommentForm);
-        const submitBtn = complaintCommentForm.querySelector('.post-btn');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Enviando...';
-        try {
-            const response = await fetch(`/foro/reclamos/${currentComplaintId}/comentar/`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': getCSRFToken()
-                }
-            });
-            const data = await response.json();
-            if (data.success) {
-                showNotification('Comentario publicado', 'success');
-                complaintCommentForm.reset();
-                cargarComentariosReclamo(currentComplaintId);
-            } else {
-                showNotification(data.error || 'Error al comentar', 'error');
-            }
-        } catch (error) {
-            showNotification('Error de conexión', 'error');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Comentar';
-        }
-    });
+
+
+// Inicializar formularios del modal de reclamos
+function setupComplaintModalForms() {
+    console.log('Inicializando formularios del modal de reclamos...');
+    
+    // Formulario de comentarios
+    const complaintCommentForm = document.getElementById('complaint-comment-form');
+    if (complaintCommentForm) {
+        console.log('Formulario de comentarios encontrado');
+        // Remover listeners existentes para evitar duplicados
+        complaintCommentForm.removeEventListener('submit', handleComplaintCommentSubmit);
+        complaintCommentForm.addEventListener('submit', handleComplaintCommentSubmit);
+    } else {
+        console.error('No se encontró el formulario de comentarios');
+    }
+    
+    // Formulario de estado
+    const complaintStatusForm = document.getElementById('complaint-status-form');
+    if (complaintStatusForm) {
+        console.log('Formulario de estado encontrado');
+        complaintStatusForm.removeEventListener('submit', handleComplaintStatusSubmit);
+        complaintStatusForm.addEventListener('submit', handleComplaintStatusSubmit);
+    } else {
+        console.error('No se encontró el formulario de estado');
+    }
+    
+    // Formulario de asignación
+    const complaintAssignForm = document.getElementById('complaint-assign-form');
+    if (complaintAssignForm) {
+        console.log('Formulario de asignación encontrado');
+        complaintAssignForm.removeEventListener('submit', handleComplaintAssignSubmit);
+        complaintAssignForm.addEventListener('submit', handleComplaintAssignSubmit);
+    } else {
+        console.error('No se encontró el formulario de asignación');
+    }
 }
 
-// Cambiar estado
-const complaintStatusForm = document.getElementById('complaint-status-form');
-if (complaintStatusForm) {
-    complaintStatusForm.addEventListener('submit', async function(event) {
-        event.preventDefault();
-        if (!currentComplaintId) return;
-        const estado = document.getElementById('complaint-status-select').value;
-        const btn = complaintStatusForm.querySelector('.post-btn');
-        btn.disabled = true;
-        btn.textContent = 'Cambiando...';
-        try {
-            const response = await fetch(`/foro/reclamos/${currentComplaintId}/cambiar-estado/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCSRFToken(),
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: `estado=${encodeURIComponent(estado)}`
-            });
-            const data = await response.json();
-            if (data.success) {
-                showNotification('Estado actualizado', 'success');
-                cargarDatosReclamo(currentComplaintId);
-            } else {
-                showNotification(data.error || 'Error al cambiar estado', 'error');
+// Handlers para los formularios del modal
+async function handleComplaintCommentSubmit(event) {
+    event.preventDefault();
+    if (!currentComplaintId) return;
+    const formData = new FormData(event.target);
+    const submitBtn = event.target.querySelector('.complaint-comment-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Enviando...';
+    try {
+        const response = await fetch(`/foro/reclamos/${currentComplaintId}/comentar/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCSRFToken()
             }
-        } catch (error) {
-            showNotification('Error de conexión', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'Cambiar estado';
+        });
+        const data = await response.json();
+        if (data.success) {
+            showNotification('Comentario publicado', 'success');
+            event.target.reset();
+            cargarComentariosReclamo(currentComplaintId);
+        } else {
+            showNotification(data.error || 'Error al comentar', 'error');
         }
-    });
+    } catch (error) {
+        showNotification('Error de conexión', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Comentar';
+    }
 }
 
-// Asignar usuarios
-const complaintAssignForm = document.getElementById('complaint-assign-form');
-if (complaintAssignForm) {
-    complaintAssignForm.addEventListener('submit', async function(event) {
-        event.preventDefault();
-        if (!currentComplaintId) return;
-        const select = document.getElementById('complaint-assign-users');
-        const asignados = Array.from(select.selectedOptions).map(opt => opt.value);
-        const btn = complaintAssignForm.querySelector('.post-btn');
-        btn.disabled = true;
-        btn.textContent = 'Asignando...';
-        try {
-            const response = await fetch(`/foro/reclamos/${currentComplaintId}/asignar/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCSRFToken(),
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ asignados })
-            });
-            const data = await response.json();
-            if (data.success) {
-                showNotification('Usuarios asignados', 'success');
-                cargarDatosReclamo(currentComplaintId);
-            } else {
-                showNotification(data.error || 'Error al asignar', 'error');
-            }
-        } catch (error) {
-            showNotification('Error de conexión', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'Asignar';
+async function handleComplaintStatusSubmit(event) {
+    event.preventDefault();
+    console.log('Enviando cambio de estado...');
+    if (!currentComplaintId) {
+        console.error('No hay currentComplaintId');
+        return;
+    }
+    const estado = document.getElementById('complaint-status-select').value;
+    console.log('Estado seleccionado:', estado);
+    const btn = event.target.querySelector('.complaint-action-btn');
+    btn.disabled = true;
+    btn.textContent = 'Cambiando...';
+    try {
+        const response = await fetch(`/foro/reclamos/${currentComplaintId}/cambiar-estado/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `estado=${encodeURIComponent(estado)}`
+        });
+        console.log('Respuesta del servidor:', response.status);
+        const data = await response.json();
+        console.log('Datos de respuesta:', data);
+        if (data.success) {
+            showNotification('Estado actualizado', 'success');
+            cargarDatosReclamo(currentComplaintId);
+        } else {
+            showNotification(data.error || 'Error al cambiar estado', 'error');
         }
-    });
+    } catch (error) {
+        console.error('Error al cambiar estado:', error);
+        showNotification('Error de conexión', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Cambiar estado';
+    }
+}
+
+async function handleComplaintAssignSubmit(event) {
+    event.preventDefault();
+    console.log('Enviando asignación de usuarios...');
+    if (!currentComplaintId) {
+        console.error('No hay currentComplaintId');
+        return;
+    }
+    const select = document.getElementById('complaint-assign-users');
+    const asignados = Array.from(select.selectedOptions).map(opt => opt.value);
+    console.log('Usuarios seleccionados:', asignados);
+    const btn = event.target.querySelector('.complaint-action-btn');
+    btn.disabled = true;
+    btn.textContent = 'Asignando...';
+    try {
+        const response = await fetch(`/foro/reclamos/${currentComplaintId}/asignar/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ asignados })
+        });
+        console.log('Respuesta del servidor:', response.status);
+        const data = await response.json();
+        console.log('Datos de respuesta:', data);
+        if (data.success) {
+            showNotification('Usuarios asignados', 'success');
+            cargarDatosReclamo(currentComplaintId);
+        } else {
+            showNotification(data.error || 'Error al asignar', 'error');
+        }
+    } catch (error) {
+        console.error('Error al asignar usuarios:', error);
+        showNotification('Error de conexión', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Asignar';
+    }
 }
 
 // Inicializar listeners al cargar reclamos
 if (document.getElementById('complaints-list')) {
     setTimeout(setupComplaintModalClicks, 500);
+}
+
+// Función para reinicializar todo después de cambios
+function reinicializarReclamos() {
+    if (document.getElementById('complaints-list')) {
+        cargarReclamosAside();
+        setTimeout(() => {
+            setupComplaintModalClicks();
+        }, 100);
+    }
+    if (document.getElementById('resolved-complaints-list')) {
+        cargarReclamosResueltosAside();
+        setupResolvedComplaintsSearch();
+    }
 } 

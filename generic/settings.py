@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from pathlib import Path
 import os
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -29,6 +28,7 @@ DEBUG = False
 
 """
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["3.92.180.141", "localhost", "127.0.0.1"]
 """
 
 ALLOWED_HOSTS = ["3.92.180.141", "localhost", "127.0.0.1"]

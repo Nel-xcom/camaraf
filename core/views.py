@@ -7,6 +7,8 @@ import pandas as pd
 from collections import Counter, defaultdict
 from datetime import datetime, date, timedelta
 import json
+from functools import wraps
+from django.http import HttpResponseForbidden
 
 # ────────────────────────────────
 # 🔧 Django Core & Utilities
@@ -16,7 +18,7 @@ from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Permission, Group
 from django.contrib.auth.views import PasswordResetView
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
@@ -42,7 +44,7 @@ from .forms import (
     CustomLoginForm, CustomPasswordResetForm,
     FarmaciaRegisterForm, LiquidacionPAMIForm, LiquidacionJerarquicosForm,
     LiquidacionGalenoForm, LiquidacionOsfatlyfForm, LiquidacionAsociartForm,
-    LiquidacionPrevencionARTForm
+    LiquidacionPrevencionARTForm, GuiaVideoForm, GuiaArchivoForm
 )
 from .models import (
     CargaDatos, Presentacion, User, Farmacia,
@@ -51,7 +53,8 @@ from .models import (
     LiquidacionPAMIPanales, LiquidacionPAMIVacunas, LiquidacionAndinaART,
     LiquidacionAsociart, LiquidacionColoniaSuiza, LiquidacionExperta,
     LiquidacionGalenoART, LiquidacionPrevencionART, Publication, PublicationLike, PublicationComment,
-    Reclamo, ReclamoComment, Notification
+    Reclamo, ReclamoComment, Notification, GuiaVideo, GuiaArchivo, LiquidacionLaSegundaART,
+    LiquidacionOSDIPP
 )
 from .utils import (
     obtener_datos_panel,
@@ -63,7 +66,12 @@ from .utils import (
     procesar_liquidacion_coloniasuiza, procesar_liquidacion_experta,
     procesar_liquidacion_galenoart, procesar_liquidacion_prevencion_art,
     #obtener_transferencias_pami_por_sociedad
-    obtener_transferencias_por_sociedad
+    obtener_transferencias_por_sociedad,
+    generar_thumbnail_para_guia_video,
+    regenerar_thumbnails_pendientes,
+    get_video_info,
+    procesar_liquidacion_lasegundaart,
+    procesar_liquidacion_osdipp_pdf
 )
 
 #----
@@ -199,22 +207,18 @@ def lista_usuarios(request):
 def buscar_usuarios(request):
     """Busca usuarios por varios campos o retorna los más recientes si no hay búsqueda."""
     query = request.GET.get('q', '').strip()
-
     if query:
-        # Concatenar first_name y last_name para búsquedas combinadas
-        usuarios = Farmacia.objects.annotate(
+        usuarios = User.objects.annotate(
             full_name=Concat('first_name', Value(' '), 'last_name', output_field=CharField())
         ).filter(
             Q(username__icontains=query) |
             Q(first_name__icontains=query) |
             Q(last_name__icontains=query) |
             Q(email__icontains=query) |
-            Q(full_name__icontains=query)  # Buscar en el nombre completo concatenado
+            Q(full_name__icontains=query)
         ).distinct()
     else:
-        # Return-- > result
-        # Retornar los usuarios más recientes
-        usuarios = Farmacia.objects.all().order_by('-date_joined')[:10]
+        usuarios = User.objects.all().order_by('-date_joined')[:10]
 
     results = [
         {
@@ -223,7 +227,7 @@ def buscar_usuarios(request):
             'first_name': user.first_name,
             'last_name': user.last_name,
             'email': user.email,
-            'sector': user.sectores.first().nombre if user.sectores.exists() else "Sin asignar",
+            'sector': user.groups.first().name if user.groups.exists() else "Sin asignar",
         }
         for user in usuarios
     ]
@@ -375,7 +379,7 @@ def guardar_presentacion(request):
             Notification.objects.create(
                 usuario=usuario,
                 mensaje=mensaje,
-                link=f"/calendar_farmacias/",
+                link=f"/calendar/",
                 tipo="foro"
             )
         # --- FIN NOTIFICACION ---
@@ -1310,21 +1314,123 @@ def listar_reclamos(request):
     """
     Devuelve los reclamos para el aside (solo no eliminados, ordenados por fecha).
     """
-    reclamos = Reclamo.objects.filter(is_deleted=False).order_by('-fecha_creacion')[:10]
-    data = [
-        {
+    from django.utils import timezone
+    from datetime import datetime
+    
+    reclamos = Reclamo.objects.filter(is_deleted=False, estado__in=['pendiente', 'en_progreso']).order_by('-fecha_creacion')[:10]
+    data = []
+    
+    for r in reclamos:
+        # Calcular tiempo transcurrido
+        ahora = timezone.now()
+        diferencia = ahora - r.fecha_creacion
+        
+        if diferencia.days > 0:
+            tiempo_transcurrido = f"hace {diferencia.days} día{'s' if diferencia.days != 1 else ''}"
+        elif diferencia.seconds >= 3600:
+            horas = diferencia.seconds // 3600
+            tiempo_transcurrido = f"hace {horas} hora{'s' if horas != 1 else ''}"
+        elif diferencia.seconds >= 60:
+            minutos = diferencia.seconds // 60
+            tiempo_transcurrido = f"hace {minutos} minuto{'s' if minutos != 1 else ''}"
+        else:
+            tiempo_transcurrido = "ahora mismo"
+        
+        # Obtener usuarios asignados
+        usuarios_asignados = []
+        if r.usuario_asignado:
+            usuarios_asignados.append(r.usuario_asignado.get_full_name() or r.usuario_asignado.username)
+        
+        # También incluir usuarios del campo ManyToMany asignados
+        for usuario in r.asignados.all():
+            nombre_usuario = usuario.get_full_name() or usuario.username
+            if nombre_usuario not in usuarios_asignados:
+                usuarios_asignados.append(nombre_usuario)
+        
+        data.append({
             'id': r.id,
             'titulo': r.titulo,
             'descripcion': r.descripcion[:120] + ('...' if len(r.descripcion) > 120 else ''),
             'usuario_creador': r.usuario_creador.get_full_name() or r.usuario_creador.username,
             'fecha_creacion': r.fecha_creacion.strftime('%d/%m/%Y'),
+            'tiempo_transcurrido': tiempo_transcurrido,
+            'usuarios_asignados': usuarios_asignados,
             'ultima_actualizacion_por': r.ultima_actualizacion_por.get_full_name() if r.ultima_actualizacion_por else '',
             'estado': r.get_estado_display(),
             'notificaciones_activas': r.notificaciones_activas,
             'es_publico': r.es_publico,
-        }
-        for r in reclamos
-    ]
+        })
+    
+    return JsonResponse({'reclamos': data})
+
+@login_required
+@require_GET
+def listar_reclamos_resueltos(request):
+    """
+    Devuelve los reclamos resueltos y cerrados para el aside (solo no eliminados, ordenados por fecha).
+    """
+    from django.utils import timezone
+    from datetime import datetime
+    
+    # Obtener parámetro de búsqueda
+    query = request.GET.get('q', '').strip()
+    
+    # Filtrar reclamos resueltos y cerrados
+    reclamos = Reclamo.objects.filter(
+        is_deleted=False, 
+        estado__in=['resuelto', 'cerrado']
+    ).order_by('-fecha_creacion')
+    
+    # Aplicar búsqueda si hay query
+    if query:
+        reclamos = reclamos.filter(titulo__icontains=query)
+    
+    # Limitar a 10 resultados
+    reclamos = reclamos[:10]
+    
+    data = []
+    
+    for r in reclamos:
+        # Calcular tiempo transcurrido
+        ahora = timezone.now()
+        diferencia = ahora - r.fecha_creacion
+        
+        if diferencia.days > 0:
+            tiempo_transcurrido = f"hace {diferencia.days} día{'s' if diferencia.days != 1 else ''}"
+        elif diferencia.seconds >= 3600:
+            horas = diferencia.seconds // 3600
+            tiempo_transcurrido = f"hace {horas} hora{'s' if horas != 1 else ''}"
+        elif diferencia.seconds >= 60:
+            minutos = diferencia.seconds // 60
+            tiempo_transcurrido = f"hace {minutos} minuto{'s' if minutos != 1 else ''}"
+        else:
+            tiempo_transcurrido = "ahora mismo"
+        
+        # Obtener usuarios asignados
+        usuarios_asignados = []
+        if r.usuario_asignado:
+            usuarios_asignados.append(r.usuario_asignado.get_full_name() or r.usuario_asignado.username)
+        
+        # También incluir usuarios del campo ManyToMany asignados
+        for usuario in r.asignados.all():
+            nombre_usuario = usuario.get_full_name() or usuario.username
+            if nombre_usuario not in usuarios_asignados:
+                usuarios_asignados.append(nombre_usuario)
+        
+        data.append({
+            'id': r.id,
+            'titulo': r.titulo,
+            'descripcion': r.descripcion[:120] + ('...' if len(r.descripcion) > 120 else ''),
+            'usuario_creador': r.usuario_creador.get_full_name() or r.usuario_creador.username,
+            'fecha_creacion': r.fecha_creacion.strftime('%d/%m/%Y'),
+            'tiempo_transcurrido': tiempo_transcurrido,
+            'usuarios_asignados': usuarios_asignados,
+            'ultima_actualizacion_por': r.ultima_actualizacion_por.get_full_name() if r.ultima_actualizacion_por else '',
+            'estado': r.get_estado_display(),
+            'notificaciones_activas': r.notificaciones_activas,
+            'es_publico': r.es_publico,
+        })
+    
     return JsonResponse({'reclamos': data})
 
 @login_required
@@ -1523,7 +1629,170 @@ def estados_reclamo(request):
 
 # --- ENDPOINTS DE NOTIFICACIONES ---
 @login_required
-@require_GET
+def guias_uso(request):
+    """Vista para la sección de Guías de uso donde los usuarios pueden subir y ver videos y archivos."""
+    # Obtener videos y archivos públicos
+    videos = GuiaVideo.objects.filter(estado='publico').order_by('-fecha_subida')
+    archivos = GuiaArchivo.objects.filter(estado='publico').order_by('-fecha_subida')
+    
+    # Búsqueda
+    query = request.GET.get('q', '')
+    if query:
+        videos = videos.filter(titulo__icontains=query)
+        archivos = archivos.filter(titulo__icontains=query)
+    
+    context = {
+        'videos': videos,
+        'archivos': archivos,
+        'query': query,
+        'usuario_actual': request.user
+    }
+    return render(request, 'guias_uso.html', context)
+
+
+@login_required
+def subir_video(request):
+    """Vista para subir un nuevo video de guía."""
+    if request.method == 'POST':
+        form = GuiaVideoForm(request.POST, request.FILES)
+        if form.is_valid():
+            video = form.save(commit=False)
+            video.usuario = request.user
+            
+            # Calcular tamaño del archivo
+            if video.archivo_video:
+                video.tamanio = video.archivo_video.size
+
+                # Calcular duración real usando OpenCV
+                info = get_video_info(video.archivo_video.path)
+                if info and info['duration']:
+                    # Formatear duración a mm:ss
+                    total_seconds = int(info['duration'])
+                    minutos = total_seconds // 60
+                    segundos = total_seconds % 60
+                    video.duracion = f"{minutos:02d}:{segundos:02d}"
+                else:
+                    video.duracion = "00:00"
+            
+            video.save()
+            
+            # Generar thumbnail automáticamente
+            print(f"Iniciando proceso de generación de thumbnail para video {video.id}")
+            try:
+                from .utils import generar_thumbnail_para_guia_video
+                success = generar_thumbnail_para_guia_video(video)
+                if success:
+                    print(f"Thumbnail generado exitosamente para video {video.id}")
+                    messages.success(request, 'Video subido exitosamente. Vista previa generada.')
+                else:
+                    print(f"No se pudo generar thumbnail para video {video.id}")
+                    messages.warning(request, 'Video subido exitosamente, pero no se pudo generar la vista previa.')
+            except Exception as e:
+                print(f"Error generando thumbnail: {e}")
+                messages.warning(request, 'Video subido exitosamente, pero hubo un problema al generar la vista previa.')
+                # No fallar si no se puede generar el thumbnail
+                # Opcional: usar tarea asíncrona
+                # from .tasks import generar_thumbnail_async
+                # generar_thumbnail_async.delay(video.id)
+            
+            return redirect('guias_uso')
+    else:
+        form = GuiaVideoForm()
+    
+    return render(request, 'subir_video.html', {'form': form})
+
+
+@login_required
+def subir_archivo(request):
+    """Vista para subir un nuevo archivo de guía."""
+    if request.method == 'POST':
+        form = GuiaArchivoForm(request.POST, request.FILES)
+        if form.is_valid():
+            archivo = form.save(commit=False)
+            archivo.usuario = request.user
+            
+            # Determinar tipo de archivo
+            if archivo.archivo:
+                extension = archivo.archivo.name.split('.')[-1].lower()
+                if extension in ['doc', 'docx']:
+                    archivo.tipo_archivo = 'doc'
+                elif extension in ['xls', 'xlsx']:
+                    archivo.tipo_archivo = 'xls'
+                elif extension in ['ppt', 'pptx']:
+                    archivo.tipo_archivo = 'ppt'
+                elif extension == 'pdf':
+                    archivo.tipo_archivo = 'pdf'
+                elif extension == 'txt':
+                    archivo.tipo_archivo = 'txt'
+                else:
+                    archivo.tipo_archivo = 'otro'
+                
+                archivo.tamanio = archivo.archivo.size
+            
+            archivo.save()
+            messages.success(request, 'Archivo subido exitosamente.')
+            return redirect('guias_uso')
+    else:
+        form = GuiaArchivoForm()
+    
+    return render(request, 'subir_archivo.html', {'form': form})
+
+
+@login_required
+def reproducir_video(request, video_id):
+    """Vista para reproducir un video."""
+    video = get_object_or_404(GuiaVideo, id=video_id, estado='publico')
+    # Incrementar contador de visualizaciones
+    video.visualizaciones += 1
+    video.save()
+    # Listado de otros videos
+    videos_list = GuiaVideo.objects.filter(estado='publico').exclude(id=video.id).order_by('-fecha_subida')
+    return render(request, 'reproducir_video.html', {'video': video, 'videos_list': videos_list})
+
+
+@login_required
+def descargar_archivo(request, archivo_id):
+    """Vista para descargar un archivo."""
+    archivo = get_object_or_404(GuiaArchivo, id=archivo_id, estado='publico')
+    
+    # Incrementar contador de descargas
+    archivo.descargas += 1
+    archivo.save()
+    
+    from django.http import FileResponse
+    import os
+    
+    file_path = archivo.archivo.path
+    if os.path.exists(file_path):
+        response = FileResponse(open(file_path, 'rb'))
+        response['Content-Disposition'] = f'attachment; filename="{archivo.archivo.name.split("/")[-1]}"'
+        return response
+    
+    return HttpResponseForbidden("Archivo no encontrado")
+
+
+@login_required
+def descargar_video(request, video_id):
+    """Vista para descargar un video."""
+    video = get_object_or_404(GuiaVideo, id=video_id, estado='publico')
+    
+    # Incrementar contador de descargas
+    video.descargas += 1
+    video.save()
+    
+    from django.http import FileResponse
+    import os
+    
+    file_path = video.archivo_video.path
+    if os.path.exists(file_path):
+        response = FileResponse(open(file_path, 'rb'))
+        response['Content-Disposition'] = f'attachment; filename="{video.archivo_video.name.split("/")[-1]}"'
+        return response
+    
+    return HttpResponseForbidden("Video no encontrado")
+
+
+@login_required
 def notificaciones_usuario(request):
     """
     Devuelve las notificaciones no leídas y recientes del usuario autenticado.
@@ -1558,3 +1827,217 @@ def marcar_notificacion_leida(request, notificacion_id):
 def marcar_todas_notificaciones_leidas(request):
     Notification.objects.filter(usuario=request.user, leido=False).update(leido=True)
     return JsonResponse({'success': True})
+
+@login_required
+def regenerar_thumbnails(request):
+    """Vista de administración para regenerar thumbnails de videos existentes."""
+    if not request.user.is_staff:
+        messages.error(request, 'No tienes permisos para acceder a esta función.')
+        return redirect('guias_uso')
+    
+    if request.method == 'POST':
+        try:
+            success = regenerar_thumbnails_pendientes()
+            if success:
+                messages.success(request, 'Proceso de regeneración de thumbnails completado.')
+            else:
+                messages.warning(request, 'No se pudieron regenerar todos los thumbnails.')
+        except Exception as e:
+            messages.error(request, f'Error durante la regeneración: {e}')
+        
+        return redirect('guias_uso')
+    
+    # Contar videos sin thumbnail
+    from .models import GuiaVideo
+    videos_sin_thumbnail = GuiaVideo.objects.filter(thumbnail__isnull=True).count()
+    total_videos = GuiaVideo.objects.count()
+    
+    context = {
+        'videos_sin_thumbnail': videos_sin_thumbnail,
+        'total_videos': total_videos,
+    }
+    
+    return render(request, 'regenerar_thumbnails.html', context)
+
+@login_required
+def eliminar_video(request, video_id):
+    """Permite eliminar un video solo al dueño o staff."""
+    video = get_object_or_404(GuiaVideo, id=video_id)
+    if request.user == video.usuario or request.user.is_staff:
+        video.delete()
+        messages.success(request, 'Video eliminado correctamente.')
+    else:
+        messages.error(request, 'No tienes permisos para eliminar este video.')
+    return redirect('guias_uso')
+
+@login_required
+def cargar_liquidacion_lasegundaart(request):
+    if request.method == "POST":
+        form = LiquidacionPAMIForm(request.POST, request.FILES)
+        if form.is_valid():
+            archivo_xlsx = request.FILES["archivo"]
+            archivo_origen = 'lq_' + datetime.now().strftime('%d%m%y_%H%M%S%f')
+            from .utils import procesar_liquidacion_lasegundaart
+            registros_creados = procesar_liquidacion_lasegundaart(archivo_xlsx, archivo_origen)
+            messages.success(request, f"Se cargaron {registros_creados} registros correctamente.")
+            return redirect("cargar_liquidacion_lasegundaart")
+    else:
+        form = LiquidacionPAMIForm()
+
+    from .models import LiquidacionLaSegundaART
+    liquidaciones = LiquidacionLaSegundaART.objects.all().order_by("-fecha_liquidacion")
+
+    archivos_disponibles = list(
+        LiquidacionLaSegundaART.objects.values_list('archivo_origen', flat=True).distinct()
+    )
+
+    return render(request, "liquidacion_lasegundaart.html", {
+        "form": form,
+        "liquidaciones": liquidaciones,
+        "archivos_disponibles": archivos_disponibles
+    })
+
+@csrf_exempt
+@login_required
+def eliminar_liquidacion_lasegundaart(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        archivo_origen = data.get("archivo_origen")
+
+        if archivo_origen:
+            LiquidacionLaSegundaART.objects.filter(archivo_origen=archivo_origen).delete()
+            return JsonResponse({"status": "ok"})
+
+    return JsonResponse({"status": "error"}, status=400)
+
+@login_required
+def cargar_liquidacion_osdipp(request):
+    from .models import LiquidacionOSDIPP
+    from .utils import procesar_liquidacion_osdipp_pdf
+    if request.method == "POST":
+        # Usar un formulario simple para PDF
+        archivo_pdf = request.FILES.get("archivo")
+        if archivo_pdf:
+            archivo_origen = 'lq_' + datetime.now().strftime('%d%m%y_%H%M%S%f')
+            registros_creados = procesar_liquidacion_osdipp_pdf(archivo_pdf, archivo_origen)
+            messages.success(request, f"Se cargaron {registros_creados} registros correctamente.")
+            return redirect("cargar_liquidacion_osdipp")
+    # Listar liquidaciones y archivos disponibles
+    liquidaciones = LiquidacionOSDIPP.objects.all().order_by("-fecha_liquidacion")
+    archivos_disponibles = list(
+        LiquidacionOSDIPP.objects.values_list('archivo_origen', flat=True).distinct()
+    )
+    return render(request, "liquidacion_osdipp.html", {
+        "liquidaciones": liquidaciones,
+        "archivos_disponibles": archivos_disponibles
+    })
+
+@login_required
+@require_GET
+def usuario_detalle_json(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    farmacia = user.farmacia
+    data = {
+        'id': user.id,
+        'username': user.username,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'email': user.email,
+        'id_facaf': user.id_facaf,
+        'codigo_farmacia': farmacia.codigo_farmacia if farmacia else '',
+        'nombre_farmacia': farmacia.nombre if farmacia else '',
+        'direccion': farmacia.direccion if farmacia else '',
+        'ciudad': farmacia.ciudad if farmacia else '',
+        'provincia': farmacia.provincia if farmacia else '',
+        'contacto_principal': farmacia.contacto_principal if farmacia else '',
+        'email_contacto': farmacia.email_contacto if farmacia else '',
+        'telefono_contacto': farmacia.telefono_contacto if farmacia else '',
+        'cuit': farmacia.cuit if farmacia else '',
+        'cbu': farmacia.cbu if farmacia else '',
+        'drogueria': farmacia.drogueria if farmacia else '',
+    }
+    return JsonResponse(data)
+
+@login_required
+@csrf_exempt
+def usuario_actualizar_json(request, user_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+    user = get_object_or_404(User, id=user_id)
+    data = json.loads(request.body)
+    # Actualizar campos de User
+    user.username = data.get('username', user.username)
+    user.email = data.get('email', user.email)
+    user.id_facaf = data.get('id_facaf', user.id_facaf)
+    if data.get('password'):
+        user.set_password(data['password'])
+    user.save()
+    # Actualizar Farmacia
+    farmacia = user.farmacia
+    if farmacia:
+        farmacia.codigo_farmacia = data.get('codigo_farmacia', farmacia.codigo_farmacia)
+        farmacia.nombre = data.get('nombre_farmacia', farmacia.nombre)
+        farmacia.direccion = data.get('direccion', farmacia.direccion)
+        farmacia.ciudad = data.get('ciudad', farmacia.ciudad)
+        farmacia.provincia = data.get('provincia', farmacia.provincia)
+        farmacia.contacto_principal = data.get('contacto_principal', farmacia.contacto_principal)
+        farmacia.email_contacto = data.get('email_contacto', farmacia.email_contacto)
+        farmacia.telefono_contacto = data.get('telefono_contacto', farmacia.telefono_contacto)
+        farmacia.cuit = data.get('cuit', farmacia.cuit)
+        farmacia.cbu = data.get('cbu', farmacia.cbu)
+        farmacia.drogueria = data.get('drogueria', farmacia.drogueria)
+        farmacia.save()
+    # Actualizar grupo/permiso
+    permiso = data.get('permiso')
+    if permiso in ['Camara', 'Farmacia']:
+        camara_group, _ = Group.objects.get_or_create(name='Camara')
+        farmacia_group, _ = Group.objects.get_or_create(name='Farmacia')
+        user.groups.clear()
+        if permiso == 'Camara':
+            user.groups.add(camara_group)
+        else:
+            user.groups.add(farmacia_group)
+    # Notificación
+    Notification.objects.create(
+        usuario=user,
+        mensaje=f"Tus datos han sido actualizados correctamente.",
+        link="/usuarios/",
+        tipo="foro"
+    )
+    return JsonResponse({'success': True})
+
+def camara_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if request.user.is_superuser or request.user.groups.filter(name='Camara').exists():
+            return view_func(request, *args, **kwargs)
+        return HttpResponseForbidden("No tienes permiso para acceder a esta sección.")
+    return _wrapped_view
+
+# Ejemplo de aplicación del decorador a vistas del módulo Camara
+@login_required
+@camara_required
+def calendario(request):
+    # ... código existente ...
+    return render(request, 'calendario.html', {"presentaciones": presentaciones})
+
+@login_required
+@camara_required
+def home_liquidacion(request):
+    obras_sociales = CargaDatos.OBRAS_SOCIALES
+    return render(request, 'cargar_liquidaciones.html', {'obras_sociales': obras_sociales})
+
+@login_required
+@camara_required
+def transferencias_tesorera(request):
+    resumen_por_obra, sin_relacion = obtener_transferencias_por_sociedad()
+    return render(request, "transferencias.html", {
+        "resumen_por_obra": resumen_por_obra,
+        "sin_relacion": sin_relacion
+    })
+
+@login_required
+@camara_required
+def lista_usuarios(request):
+    usuarios = Farmacia.objects.all()
+    return render(request, 'usuarios.html', {'usuarios': usuarios})

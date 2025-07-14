@@ -12,6 +12,316 @@ body {
   line-height: 1.5;
 }
 
+html, body {
+  height: 100%;
+}
+
+.complaint-modal, .comment-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  pointer-events: none;
+  min-height: 0;
+  min-width: 0;
+}
+
+.complaint-modal[style*="display: block"], .comment-modal[style*="display: block"] {
+  pointer-events: auto;
+}
+
+.complaint-modal-content, .comment-modal-content {
+  position: relative;
+  z-index: 2;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  width: 90vw;
+  max-width: 1000px;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideIn 0.3s ease-out;
+  min-height: 0;
+  min-width: 0;
+  padding: 32px 28px 24px 28px;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Header */
+.complaint-modal-header {
+  padding: 24px 32px 20px 32px;
+  border-bottom: 1px solid #f0f0f0;
+  position: relative;
+  background: #ffffff;
+}
+
+.complaint-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.complaint-modal-close:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.complaint-modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.complaint-modal-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+  flex-wrap: wrap;
+}
+
+.complaint-modal-separator {
+  color: #ccc;
+}
+
+.complaint-modal-status {
+  font-weight: 600;
+  color: #1d9bf0;
+}
+
+/* Body */
+.complaint-modal-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.complaint-modal-main {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 0;
+  min-height: 0;
+}
+
+.complaint-modal-description-section {
+  padding: 24px 32px;
+  border-right: 1px solid #f0f0f0;
+  overflow-y: auto;
+}
+
+.complaint-modal-description {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+.complaint-modal-attachments {
+  margin-top: 16px;
+}
+
+.complaint-modal-attachments img {
+  max-width: 100%;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.complaint-modal-attachments a {
+  color: #1d9bf0;
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Actions Sidebar */
+.complaint-modal-actions {
+  padding: 24px 24px 24px 0;
+  background: #fafafa;
+  overflow-y: auto;
+}
+
+.complaint-action-form {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid #e0e0e0;
+}
+
+.complaint-action-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.complaint-action-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #ffffff;
+  margin-bottom: 12px;
+  min-height: 80px;
+}
+
+.complaint-action-select:focus {
+  outline: none;
+  border-color: #1d9bf0;
+  box-shadow: 0 0 0 3px rgba(29, 155, 240, 0.1);
+}
+
+.complaint-action-btn {
+  width: 100%;
+  background: #1d9bf0;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.complaint-action-btn:hover {
+  background: #1a8cd8;
+}
+
+.complaint-action-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Comments Section */
+.complaint-modal-comments {
+  margin-top: 24px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 24px;
+}
+
+.complaint-comments-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+}
+
+.complaint-comment-form {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 16px;
+}
+
+.complaint-comment-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.complaint-comment-input {
+  width: 100%;
+  min-height: 80px;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  font-family: inherit;
+  background: #fafafa;
+  transition: border-color 0.2s ease;
+}
+
+.complaint-comment-input:focus {
+  outline: none;
+  border-color: #1d9bf0;
+  background: #ffffff;
+}
+
+.complaint-comment-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.complaint-comment-files {
+  display: flex;
+  gap: 16px;
+}
+
+.complaint-file-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #1d9bf0;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.complaint-file-input:hover {
+  background: #f0f8ff;
+}
+
+.complaint-comment-btn {
+  background: #1d9bf0;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.complaint-comment-btn:hover {
+  background: #1a8cd8;
+}
+
+.complaint-comment-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
 /* Layout principal del foro */
 .foro-wrapper {
   width: 98.5%;
@@ -25,6 +335,14 @@ body {
   width: 100%;
   gap: 24px;
   padding: 20px;
+}
+
+/* Contenedor para los asides */
+.aside-container {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 /* Contenedor principal */
@@ -408,15 +726,56 @@ body {
 
 /* Aside: Contenedor de Reclamos */
 .complaints-container {
-  width: 30%;
+  width: 100%;
   background-color: #ffffff;
   border-radius: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #e1e8ed;
   overflow: hidden;
   height: fit-content;
-  position: sticky;
-  top: 20px;
+}
+
+/* Contenedor de Reclamos Resueltos */
+.resolved-complaints-container {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e1e8ed;
+  overflow: hidden;
+  height: fit-content;
+}
+
+/* Contenedor de búsqueda */
+.search-container {
+  position: relative;
+  padding: 0 20px 16px 20px;
+  border-bottom: 1px solid #e1e8ed;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 40px 10px 12px;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #f7f9fa;
+  transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #1d9bf0;
+  background-color: #ffffff;
+}
+
+.search-icon {
+  position: absolute;
+  right: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #536471;
+  font-size: 14px;
 }
 
 .complaints-header {
@@ -489,6 +848,397 @@ body {
 .complaint-date {
   color: #536471;
   font-size: 12px;
+}
+
+.complaint-assigned {
+  color: #1d9bf0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.complaint-time {
+  color: #536471;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Estilos para reclamos resueltos */
+.resolved-complaint-item {
+  opacity: 0.8;
+  background-color: #f8f9fa;
+}
+
+.resolved-complaint-item:hover {
+  opacity: 1;
+  background-color: #f0f2f5;
+}
+
+.resolved-complaint-item .complaint-title {
+  color: #536471;
+}
+
+.resolved-complaint-item .complaint-description {
+  color: #657786;
+}
+
+.resolved-complaint-item .update-info {
+  color: #00a651;
+  font-weight: 600;
+}
+
+/* Modal de Reclamos - Estilo Apple/X */
+.complaint-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  pointer-events: none;
+}
+
+.complaint-modal[style*="display: block"] {
+  pointer-events: auto;
+}
+
+.complaint-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.complaint-modal-content {
+  position: fixed !important;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  width: 90vw;
+  max-width: 1000px;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideIn 0.3s ease-out;
+  padding: 32px 28px 24px 28px;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Header */
+.complaint-modal-header {
+  padding: 24px 32px 20px 32px;
+  border-bottom: 1px solid #f0f0f0;
+  position: relative;
+  background: #ffffff;
+}
+
+.complaint-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.complaint-modal-close:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.complaint-modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.complaint-modal-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+  flex-wrap: wrap;
+}
+
+.complaint-modal-separator {
+  color: #ccc;
+}
+
+.complaint-modal-status {
+  font-weight: 600;
+  color: #1d9bf0;
+}
+
+/* Body */
+.complaint-modal-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.complaint-modal-main {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 0;
+  min-height: 0;
+}
+
+.complaint-modal-description-section {
+  padding: 24px 32px;
+  border-right: 1px solid #f0f0f0;
+  overflow-y: auto;
+}
+
+.complaint-modal-description {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+.complaint-modal-attachments {
+  margin-top: 16px;
+}
+
+.complaint-modal-attachments img {
+  max-width: 100%;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.complaint-modal-attachments a {
+  color: #1d9bf0;
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Actions Sidebar */
+.complaint-modal-actions {
+  padding: 24px 24px 24px 0;
+  background: #fafafa;
+  overflow-y: auto;
+}
+
+.complaint-action-form {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid #e0e0e0;
+}
+
+.complaint-action-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.complaint-action-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #ffffff;
+  margin-bottom: 12px;
+  min-height: 80px;
+}
+
+.complaint-action-select:focus {
+  outline: none;
+  border-color: #1d9bf0;
+  box-shadow: 0 0 0 3px rgba(29, 155, 240, 0.1);
+}
+
+.complaint-action-btn {
+  width: 100%;
+  background: #1d9bf0;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.complaint-action-btn:hover {
+  background: #1a8cd8;
+}
+
+.complaint-action-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Comments Section */
+.complaint-modal-comments {
+  margin-top: 24px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 24px;
+}
+
+.complaint-comments-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+}
+
+.complaint-comment-form {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 16px;
+}
+
+.complaint-comment-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.complaint-comment-input {
+  width: 100%;
+  min-height: 80px;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  font-family: inherit;
+  background: #fafafa;
+  transition: border-color 0.2s ease;
+}
+
+.complaint-comment-input:focus {
+  outline: none;
+  border-color: #1d9bf0;
+  background: #ffffff;
+}
+
+.complaint-comment-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.complaint-comment-files {
+  display: flex;
+  gap: 16px;
+}
+
+.complaint-file-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #1d9bf0;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.complaint-file-input:hover {
+  background: #f0f8ff;
+}
+
+.complaint-comment-btn {
+  background: #1d9bf0;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.complaint-comment-btn:hover {
+  background: #1a8cd8;
+}
+
+.complaint-comment-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .complaint-modal {
+    padding: 10px;
+  }
+  
+  .complaint-modal-content {
+    width: 95vw;
+    max-height: 90vh;
+    border-radius: 16px;
+  }
+  
+  .complaint-modal-main {
+    grid-template-columns: 1fr;
+  }
+  
+  .complaint-modal-description-section {
+    border-right: none;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .complaint-modal-actions {
+    padding: 20px 32px;
+  }
+  
+  .complaint-modal-header {
+    padding: 20px 24px 16px 24px;
+  }
+  
+  .complaint-modal-title {
+    font-size: 20px;
+  }
 }
 
 .complaint-actions {

@@ -34,6 +34,8 @@ urlpatterns = [
     path('usuarios/', views.lista_usuarios, name='lista_usuarios'),
     path('buscar_usuarios/', views.buscar_usuarios, name='buscar_usuarios'),
     path('usuario/actualizar/', views.actualizar_usuario, name='actualizar_usuario'),
+    path('usuario/<int:user_id>/detalle_json/', views.usuario_detalle_json, name='usuario_detalle_json'),
+    path('usuario/<int:user_id>/actualizar_json/', views.usuario_actualizar_json, name='usuario_actualizar_json'),
 
     path('calendario/', views.calendario, name="calendario"),
     path('get_presentaciones_listado/', views.get_presentaciones_listado, name='get_presentaciones_listado'),
@@ -90,6 +92,7 @@ urlpatterns = [
     path("foro/comentario/<int:comentario_id>/responder/", views.responder_comentario, name="responder_comentario"),
     path("foro/reclamos/crear/", views.crear_reclamo, name="crear_reclamo"),
     path("foro/reclamos/listar/", views.listar_reclamos, name="listar_reclamos"),
+    path("foro/reclamos/resueltos/", views.listar_reclamos_resueltos, name="listar_reclamos_resueltos"),
     path("foro/reclamos/<int:reclamo_id>/cambiar-estado/", views.cambiar_estado_reclamo, name="cambiar_estado_reclamo"),
     path("foro/reclamos/<int:reclamo_id>/eliminar/", views.eliminar_reclamo, name="eliminar_reclamo"),
     path("foro/reclamos/<int:reclamo_id>/toggle-notificaciones/", views.toggle_notificaciones_reclamo, name="toggle_notificaciones_reclamo"),
@@ -101,9 +104,20 @@ urlpatterns = [
     path("foro/reclamos/estados/", views.estados_reclamo, name="estados_reclamo"),
     path("foro/reclamos/comentario/<int:comentario_id>/responder/", views.responder_comentario_reclamo, name="responder_comentario_reclamo"),
     path("foro/reclamos/comentario/<int:comentario_id>/eliminar/", views.eliminar_comentario_reclamo, name="eliminar_comentario_reclamo"),
+    path("guias-uso/", views.guias_uso, name="guias_uso"),
+    path("guias-uso/subir-video/", views.subir_video, name="subir_video"),
+    path("guias-uso/subir-archivo/", views.subir_archivo, name="subir_archivo"),
+    path("guias-uso/video/<int:video_id>/reproducir/", views.reproducir_video, name="reproducir_video"),
+    path("guias-uso/archivo/<int:archivo_id>/descargar/", views.descargar_archivo, name="descargar_archivo"),
+    path("guias-uso/video/<int:video_id>/descargar/", views.descargar_video, name="descargar_video"),
+    path("guias-uso/regenerar-thumbnails/", views.regenerar_thumbnails, name="regenerar_thumbnails"),
     path("notificaciones/", views.notificaciones_usuario, name="notificaciones_usuario"),
     path("notificaciones/<int:notificacion_id>/leer/", views.marcar_notificacion_leida, name="marcar_notificacion_leida"),
     path("notificaciones/marcar-todas-leidas/", views.marcar_todas_notificaciones_leidas, name="marcar_todas_notificaciones_leidas"),
+    path("guias-uso/video/<int:video_id>/eliminar/", views.eliminar_video, name="eliminar_video"),
+    path("cargar-liquidacion-lasegundaart/", views.cargar_liquidacion_lasegundaart, name="cargar_liquidacion_lasegundaart"),
+    path("eliminar-liquidacion-lasegundaart/", views.eliminar_liquidacion_lasegundaart, name="eliminar_liquidacion_lasegundaart"),
+    path("cargar-liquidacion-osdipp/", views.cargar_liquidacion_osdipp, name="cargar_liquidacion_osdipp"),
 ]
 
 if settings.DEBUG:

@@ -1,4 +1,5 @@
 {% load static %}
+{% load user_groups %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,13 +47,15 @@
 
                     <div class="section-header">
                         <div class="header-title">
-                            <b>2</b><h3 data-number="1">Novedades</h3>
+                            <b>2</b><h3 data-number="1">Herramientas</h3>
                         </div>
                         <ul>
-                            <li><a href="{% url 'foro' %}"><i class="fas fa-home"></i><span>Home</span></a></li>
+                            <li><a href="{% url 'foro' %}"><i class="fas fa-comment-dots"></i><span>Anuncios y reclamos</span></a></li>
+                            <li><a href="{% url 'guias_uso' %}"><i class="fas fa-book"></i><span>Guías de uso</span></a></li>
                         </ul>
                     </div>
 
+                    {% if request.user.is_superuser or request.user|has_group:'Camara' %}
                     <div class="section-header">
                         <div class="header-title">
                             <b>3</b><h3 data-number="2">Camara</h3>
@@ -62,8 +65,10 @@
                             <li><a href="{%url 'hliquidacion'%}"><i class="fas fa-dollar-sign"></i><span>Liquidaciones</span></a></li>
                             <!--<li><a href="{%url 'panel_liquidaciones'%}"><i class="fas fa-check-circle"></i><span>Panel Analitico</span></a></li>-->
                             <li><a href="{% url 'transferencias' %}"><i class="fas fa-exchange-alt"></i><span>Transferencias</span></a></li>
+                            <li><a href="{% url 'lista_usuarios' %}"><i class="fas fa-user"></i><span>Usuarios y permisos</span></a></li>
                         </ul>
                     </div>
+                    {% endif %}
 
                     <!--<div class="section-header">
                         <div class="header-title">
@@ -74,12 +79,6 @@
                         </ul>
                     </div>-->
                     <!-- Cerrar sesión -->
-                    <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="logout" style="background: none; border: none; color: #f2f2f2; cursor: pointer;">
-                            Cerrar sesión
-                        </button>
-                    </form>
                     <footer>
                         <p>Powered by <b>NelX</b> &copy; 2024</p>
                     </footer>
@@ -96,6 +95,13 @@
                 <div style="position:absolute;top:-12px;right:18px;width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:12px solid #fff;filter:drop-shadow(0 -2px 2px rgba(0,0,0,0.04));"></div>
                 <div id="notification-list" style="padding:0;"></div>
             </div>
+            <!-- Botón de cerrar sesión a la derecha de la campanita -->
+            <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: inline; margin-left: 24px;">
+                {% csrf_token %}
+                <button type="submit" class="logout" style="background: none; border: none; color: #f2f2f2; cursor: pointer; font-size: 1.1em; padding: 0 12px;">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                </button>
+            </form>
         </div>
     </header>
 

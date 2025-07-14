@@ -29,7 +29,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    color: #2ECC71;
+    color: #8cc0e8;
     font-size: 1.8rem;
 }
 
@@ -44,10 +44,9 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 20px 0;
-    max-width: 60%;
-    margin: 0 auto 30px;
-    border: 2px solid #2ECC71;
+    margin: 20px auto 30px auto;
+    max-width: 500px;
+    border: 2px solid #8cc0e8;
     border-radius: 50px;
     background-color: #ffffff;
     padding: 5px 15px;
@@ -55,12 +54,13 @@ body {
 
 .search-bar input[type="text"] {
     width: 100%;
-    padding: 10px;
+    padding: 14px 18px;
     border: none;
     background: #ffffff;
     outline: none;
-    font-size: 1em;
-    border-radius: 50px 0 0 50px;
+    font-size: 1.2em;
+    border-radius: 50px;
+    text-align: center;
 }
 
 .search-bar button {
@@ -79,36 +79,42 @@ body {
 /* Contenedor de resultados */
 .user-results {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Ajuste dinámico de columnas */
-    gap: 20px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
     padding: 20px;
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
+    justify-items: center;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 .user-results > a{
     text-decoration: none;
+    /* width: 100%; */
+    max-width: 350px;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 /* Tarjeta de usuario */
 .user-card {
     position: relative;
-    background: #2ECC71;
+    background: #8cc0e8;
     border-radius: 20px;
-    box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1), -10px -10px 20px rgba(255, 255, 255, 0.7);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
     padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 200px; /* Altura fija para uniformidad */
-    overflow: hidden;
-    color: white; /* Texto blanco */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    min-height: 180px;
+    color: white;
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .user-card:hover {
-    transform: scale(1.05); /* Efecto de ampliación */
-    box-shadow: 15px 15px 30px rgba(0, 0, 0, 0.15), -15px -15px 30px rgba(255, 255, 255, 0.9);
+    transform: scale(1.04);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.13);
 }
 
 /* Fondo decorativo (si necesitas mantenerlo) */
@@ -134,7 +140,7 @@ body {
 }
 
 .user-info h3 {
-    font-size: 1.5em;
+    font-size: 1.3em;
     font-weight: bold;
     margin: 0;
     color: white; /* Asegura legibilidad */
@@ -207,6 +213,19 @@ body {
 }
 
 /* Responsividad */
+@media (max-width: 1024px) {
+    .user-results {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 700px) {
+    .user-results {
+        grid-template-columns: 1fr;
+    }
+    .search-bar {
+        max-width: 95vw;
+    }
+}
 @media (max-width: 768px) {
     .h3-container {
         flex-direction: column; /* Alinear verticalmente en pantallas pequeñas */

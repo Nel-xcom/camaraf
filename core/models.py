@@ -166,6 +166,12 @@ class LiquidacionPAMI(models.Model):
     nota_credito = models.DecimalField(max_digits=15, decimal_places=2, help_text="Nota de crédito aplicada")
     subtotal_pagar = models.DecimalField(max_digits=15, decimal_places=2, help_text="Subtotal a pagar")
     
+    # Nuevos campos agregados para coincidir con el Excel
+    debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00, help_text="Débitos OS")
+    creditos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00, help_text="Créditos OS")
+    inst_pago_drogueria = models.DecimalField(max_digits=15, decimal_places=2, default=0.00, help_text="Inst. Pago Droguería")
+    recuperacion_gastos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00, help_text="Recupero Gastos")
+
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_pami')
 
     creado_en = models.DateTimeField(auto_now_add=True)
@@ -193,6 +199,12 @@ class LiquidacionJerarquicos(models.Model):
     bonificacion = models.DecimalField(max_digits=15, decimal_places=2, help_text="Bonificación aplicada")
     nota_credito = models.DecimalField(max_digits=15, decimal_places=2, help_text="Nota de crédito aplicada")
     subtotal_pagar = models.DecimalField(max_digits=15, decimal_places=2, help_text="Subtotal a pagar")
+    
+    # Nuevos campos agregados
+    debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    credito = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    gastos_debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_gastos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
 
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_jerarquicos')
 
@@ -220,6 +232,12 @@ class LiquidacionOspil(models.Model):
     bonificacion = models.DecimalField(max_digits=15, decimal_places=2)
     nota_credito = models.DecimalField(max_digits=15, decimal_places=2)
     subtotal_pagar = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    # Nuevos campos agregados
+    debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    credito = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    gastos_debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_gastos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
 
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_ospil')
 
@@ -243,6 +261,13 @@ class LiquidacionOsfatlyf(models.Model):
     bonificacion = models.DecimalField(max_digits=15, decimal_places=2)
     nota_credito = models.DecimalField(max_digits=15, decimal_places=2)
 
+    # Nuevos campos agregados
+    debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_gastos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    subtotal_a_pagar = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_osfatlyf')
 
     archivo_origen = models.CharField(max_length=50, null=True, blank=True)
@@ -250,7 +275,7 @@ class LiquidacionOsfatlyf(models.Model):
     actualizado_en = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.farmacia} - {self.fecha_liquidacion} - {self.subtotal_pagar}"
+        return f"{self.farmacia} - {self.fecha_liquidacion} - {self.subtotal_a_pagar}"
     
 class LiquidacionPAMIOncologico(models.Model):
     farmacia = models.ForeignKey(Farmacia, on_delete=models.CASCADE, related_name="liquidaciones_pami_oncologico")
@@ -265,6 +290,11 @@ class LiquidacionPAMIOncologico(models.Model):
     bonificacion = models.DecimalField(max_digits=15, decimal_places=2, help_text="Bonificación aplicada")
     nota_credito = models.DecimalField(max_digits=15, decimal_places=2, help_text="Nota de crédito aplicada")
     subtotal_pagar = models.DecimalField(max_digits=15, decimal_places=2, help_text="Subtotal a pagar")
+
+    debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_gastos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
 
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_pami_oncologico')
 
@@ -294,6 +324,11 @@ class LiquidacionPAMIPanales(models.Model):
     nota_credito = models.DecimalField(max_digits=15, decimal_places=2, help_text="Nota de crédito aplicada")
     subtotal_pagar = models.DecimalField(max_digits=15, decimal_places=2, help_text="Subtotal a pagar")
 
+    debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_gastos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_pami_pañales')
 
     creado_en = models.DateTimeField(auto_now_add=True)
@@ -321,6 +356,11 @@ class LiquidacionPAMIVacunas(models.Model):
     nota_credito = models.DecimalField(max_digits=15, decimal_places=2)
     subtotal_pagar = models.DecimalField(max_digits=15, decimal_places=2)
 
+    debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_gastos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_pami_vacunas')
 
     archivo_origen = models.CharField(max_length=50, null=True, blank=True)
@@ -343,6 +383,12 @@ class LiquidacionAndinaART(models.Model):
     bonificacion = models.DecimalField(max_digits=15, decimal_places=2)
     nota_credito = models.DecimalField(max_digits=15, decimal_places=2)
     subtotal_pagar = models.DecimalField(max_digits=15, decimal_places=2)
+
+    # Retenciones
+    debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_gastos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
 
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_andinaart')
 
@@ -370,6 +416,12 @@ class LiquidacionAsociart(models.Model):
     bonificacion = models.DecimalField(max_digits=15, decimal_places=2, help_text="Bonificación aplicada")
     nota_credito = models.DecimalField(max_digits=15, decimal_places=2, help_text="Nota de crédito aplicada")
     subtotal_pagar = models.DecimalField(max_digits=15, decimal_places=2, help_text="Subtotal a pagar")
+    
+    # Nuevos campos agregados
+    debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_gastos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
 
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_asociart')
 
@@ -397,6 +449,12 @@ class LiquidacionColoniaSuiza(models.Model):
     bonificacion = models.DecimalField(max_digits=15, decimal_places=2)
     nota_credito = models.DecimalField(max_digits=15, decimal_places=2)
     subtotal_pagar = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    # Nuevos campos agregados
+    debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_gastos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
 
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_coloniasuiza')
 
@@ -423,6 +481,12 @@ class LiquidacionExperta(models.Model):
     bonificacion = models.DecimalField(max_digits=15, decimal_places=2)
     nota_credito = models.DecimalField(max_digits=15, decimal_places=2)
     subtotal_pagar = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    # Nuevos campos agregados
+    debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_gastos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
 
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_experta')
 
@@ -449,6 +513,12 @@ class LiquidacionGalenoART(models.Model):
     bonificacion = models.DecimalField(max_digits=15, decimal_places=2)
     nota_credito = models.DecimalField(max_digits=15, decimal_places=2)
     subtotal_pagar = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    # Nuevos campos agregados
+    debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    credito = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    gastos_debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_gastos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
 
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_galenoart')
 
@@ -476,6 +546,12 @@ class LiquidacionPrevencionART(models.Model):
     bonificacion = models.DecimalField(max_digits=15, decimal_places=2)
     nota_credito = models.DecimalField(max_digits=15, decimal_places=2)
     subtotal_pagar = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    # Nuevos campos agregados
+    debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_ajustes = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_gastos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
 
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_prevencionart')
 
@@ -798,3 +874,242 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notificación para {self.usuario}: {self.mensaje[:40]}..."
+
+
+class GuiaVideo(models.Model):
+    """
+    Modelo para videos de guías de uso
+    """
+    CATEGORIAS = [
+        ('tutorial', 'Tutorial'),
+        ('manual', 'Manual'),
+        ('explicacion', 'Explicación'),
+        ('demo', 'Demostración'),
+        ('otro', 'Otro'),
+    ]
+    
+    ESTADOS = [
+        ('publico', 'Público'),
+        ('privado', 'Privado'),
+    ]
+    
+    # Información básica
+    titulo = models.CharField(max_length=200, help_text="Título del video")
+    descripcion = models.TextField(blank=True, help_text="Descripción del video")
+    categoria = models.CharField(max_length=20, choices=CATEGORIAS, default='tutorial')
+    estado = models.CharField(max_length=10, choices=ESTADOS, default='publico')
+    
+    # Archivo de video
+    archivo_video = models.FileField(
+        upload_to='guias/videos/',
+        help_text="Archivo de video (MP4, AVI, MOV, etc.)"
+    )
+    
+    # Thumbnail generado automáticamente
+    thumbnail = models.ImageField(
+        upload_to='guias/thumbnails/',
+        null=True,
+        blank=True,
+        help_text="Imagen de vista previa generada automáticamente del video"
+    )
+    
+    # Metadatos del video
+    duracion = models.CharField(max_length=10, blank=True, help_text="Duración del video (HH:MM:SS)")
+    tamanio = models.BigIntegerField(null=True, blank=True, help_text="Tamaño del archivo en bytes")
+    
+    # Usuario y fechas
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='videos_subidos',
+        help_text="Usuario que subió el video"
+    )
+    fecha_subida = models.DateTimeField(auto_now_add=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
+    
+    # Contadores
+    visualizaciones = models.PositiveIntegerField(default=0, help_text="Número de visualizaciones")
+    descargas = models.PositiveIntegerField(default=0, help_text="Número de descargas")
+    
+    class Meta:
+        verbose_name = "Video de Guía"
+        verbose_name_plural = "Videos de Guías"
+        ordering = ['-fecha_subida']
+    
+    def __str__(self):
+        return self.titulo
+    
+    def get_duracion_formateada(self):
+        """Retorna la duración en formato legible"""
+        if self.duracion:
+            return self.duracion
+        return "00:00"
+    
+    def get_tamanio_formateado(self):
+        """Retorna el tamaño en formato legible"""
+        if not self.tamanio:
+            return "0 KB"
+        
+        for unidad in ['B', 'KB', 'MB', 'GB']:
+            if self.tamanio < 1024.0:
+                return f"{self.tamanio:.1f} {unidad}"
+            self.tamanio /= 1024.0
+        return f"{self.tamanio:.1f} TB"
+
+
+class GuiaArchivo(models.Model):
+    """
+    Modelo para archivos de guías de uso (PDF, Word, etc.)
+    """
+    TIPOS_ARCHIVO = [
+        ('pdf', 'PDF'),
+        ('doc', 'Word'),
+        ('docx', 'Word'),
+        ('xls', 'Excel'),
+        ('xlsx', 'Excel'),
+        ('ppt', 'PowerPoint'),
+        ('pptx', 'PowerPoint'),
+        ('txt', 'Texto'),
+        ('otro', 'Otro'),
+    ]
+    
+    CATEGORIAS = [
+        ('manual', 'Manual'),
+        ('procedimiento', 'Procedimiento'),
+        ('formulario', 'Formulario'),
+        ('guia', 'Guía'),
+        ('faq', 'Preguntas Frecuentes'),
+        ('otro', 'Otro'),
+    ]
+    
+    ESTADOS = [
+        ('publico', 'Público'),
+        ('privado', 'Privado'),
+    ]
+    
+    # Información básica
+    titulo = models.CharField(max_length=200, help_text="Título del archivo")
+    descripcion = models.TextField(blank=True, help_text="Descripción del archivo")
+    categoria = models.CharField(max_length=20, choices=CATEGORIAS, default='manual')
+    estado = models.CharField(max_length=10, choices=ESTADOS, default='publico')
+    
+    # Archivo
+    archivo = models.FileField(
+        upload_to='guias/archivos/',
+        help_text="Archivo (PDF, Word, Excel, etc.)"
+    )
+    
+    # Metadatos del archivo
+    tipo_archivo = models.CharField(max_length=10, choices=TIPOS_ARCHIVO, default='pdf')
+    tamanio = models.BigIntegerField(null=True, blank=True, help_text="Tamaño del archivo en bytes")
+    
+    # Usuario y fechas
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='archivos_subidos',
+        help_text="Usuario que subió el archivo"
+    )
+    fecha_subida = models.DateTimeField(auto_now_add=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
+    
+    # Contadores
+    descargas = models.PositiveIntegerField(default=0, help_text="Número de descargas")
+    visualizaciones = models.PositiveIntegerField(default=0, help_text="Número de visualizaciones")
+    
+    class Meta:
+        verbose_name = "Archivo de Guía"
+        verbose_name_plural = "Archivos de Guías"
+        ordering = ['-fecha_subida']
+    
+    def __str__(self):
+        return self.titulo
+    
+    def get_tamanio_formateado(self):
+        """Retorna el tamaño en formato legible"""
+        if not self.tamanio:
+            return "0 KB"
+        
+        tamanio = self.tamanio
+        for unidad in ['B', 'KB', 'MB', 'GB']:
+            if tamanio < 1024.0:
+                return f"{tamanio:.1f} {unidad}"
+            tamanio /= 1024.0
+        return f"{tamanio:.1f} TB"
+    
+    def get_extension(self):
+        """Retorna la extensión del archivo"""
+        if self.archivo:
+            return self.archivo.name.split('.')[-1].upper()
+        return ""
+
+
+class LiquidacionLaSegundaART(models.Model):
+    farmacia = models.ForeignKey(Farmacia, on_delete=models.CASCADE, related_name="liquidaciones_lasegundaart")
+    codigo_farmacia = models.CharField(max_length=20)
+    nombre_farmacia = models.CharField(max_length=255)
+    plan = models.CharField(max_length=255)
+    fecha_liquidacion = models.DateField()
+
+    importe_100 = models.DecimalField(max_digits=15, decimal_places=2)
+    a_cargo_os = models.DecimalField(max_digits=15, decimal_places=2)
+    bonificacion = models.DecimalField(max_digits=15, decimal_places=2)
+    nota_credito = models.DecimalField(max_digits=15, decimal_places=2)
+    subtotal_pagar = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    # Nuevos campos agregados
+    debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    credito = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    gastos_debitos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    recuperacion_gastos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+
+    user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_lasegundaart')
+
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Liquidación La Segunda ART"
+        verbose_name_plural = "Liquidaciones La Segunda ART"
+
+    def __str__(self):
+        return f"{self.farmacia} - {self.fecha_liquidacion} - {self.subtotal_pagar}"
+
+
+class LiquidacionOSDIPP(models.Model):
+    farmacia = models.ForeignKey(Farmacia, on_delete=models.CASCADE, related_name="liquidaciones_osdipp")
+    codigo_farmacia = models.CharField(max_length=20, help_text="Código de la farmacia")
+    nombre_farmacia = models.CharField(max_length=255, help_text="Nombre de la farmacia")
+    plan = models.CharField(max_length=255, help_text="Plan de la obra social", default="OSDIPP")
+    fecha_liquidacion = models.DateField(help_text="Fecha de la liquidación")
+
+    # Datos financieros principales (ajustar según los datos del PDF)
+    recetas_presentadas = models.IntegerField(default=0)
+    importe_total_presentado = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
+    importe_entregado_presentado = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
+    recetas_aceptadas = models.IntegerField(default=0)
+    importe_total_aceptado = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
+    importe_entregado_aceptado = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
+    aporte_farmacia = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
+    gastos_auditoria = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
+    importe_neto = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
+    gastos_recs = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
+    ajustes_anteriores = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
+    ajuste_credito_anticipado = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
+    importe_a_pagar = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
+    importe_efectivo = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
+    ajustes_posteriores = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
+
+    # Archivo y usuario
+    archivo_origen = models.CharField(max_length=50, null=True, blank=True)
+    user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_osdipp')
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Liquidación OSDIPP"
+        verbose_name_plural = "Liquidaciones OSDIPP"
+
+    def __str__(self):
+        return f"{self.farmacia} - {self.fecha_liquidacion} - {self.importe_a_pagar}"

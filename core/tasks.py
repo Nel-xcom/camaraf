@@ -3,6 +3,7 @@ from celery import shared_task
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from .models import Notificacion, CustomUser
+from .utils import generar_thumbnail_para_guia_video
 
 User = get_user_model()
 
@@ -50,3 +51,19 @@ def enviar_notificacion_tarea(solicitante, destinatario_id, descripcion):
         return f"Notificación enviada a {destinatario.username}"
     except CustomUser.DoesNotExist:
         return f"Usuario con ID {destinatario_id} no encontrado."
+
+
+@shared_task
+def generar_thumbnail_async(video_id):
+    """
+    Tarea asíncrona para generar thumbnail de un video.
+    """
+    try:
+        from .models import GuiaVideo
+        video = GuiaVideo.objects.get(id=video_id)
+        return generar_thumbnail_para_guia_video(video)
+    except GuiaVideo.DoesNotExist:
+        return False
+    except Exception as e:
+        print(f"Error en tarea de generación de thumbnail: {e}")
+        return False
