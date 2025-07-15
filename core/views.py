@@ -2019,6 +2019,8 @@ def camara_required(view_func):
 @camara_required
 def calendario(request):
     # ... código existente ...
+    presentaciones = Presentacion.objects.all()
+    
     return render(request, 'calendario.html', {"presentaciones": presentaciones})
 
 @login_required
