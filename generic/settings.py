@@ -30,7 +30,6 @@ DEBUG = False
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 ALLOWED_HOSTS = ["3.92.180.141", "localhost", "127.0.0.1"]
 """
-
 ALLOWED_HOSTS = ["3.92.180.141", "localhost", "127.0.0.1"]
 
 AUTH_USER_MODEL = 'core.User' 
