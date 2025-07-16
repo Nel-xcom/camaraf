@@ -45,45 +45,52 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 document.addEventListener("DOMContentLoaded", () => {
+    const userIsCamara = document.body.getAttribute('data-user-camara') === 'true';
     document.querySelectorAll(".editable-estado").forEach(cell => {
         const span = cell.querySelector(".estado-label");
         const select = cell.querySelector(".estado-select");
         const presentacionId = cell.dataset.id;
 
-        // Mostrar <select> al hacer clic
-        span.addEventListener("click", () => {
-            span.style.display = "none";
-            select.style.display = "inline-block";
-            select.focus();
-        });
+        // Solo permitir interacción si el usuario es Camara
+        if (userIsCamara && select) {
+            // Mostrar <select> al hacer clic
+            span.addEventListener("click", () => {
+                span.style.display = "none";
+                select.style.display = "inline-block";
+                select.focus();
+            });
 
-        // Guardar al presionar Enter
-        select.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                const nuevoEstado = select.value;
+            // Guardar al presionar Enter
+            select.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    const nuevoEstado = select.value;
 
-                fetch(`/actualizar_estado_presentacion/${presentacionId}/`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": getCSRFToken()
-                    },
-                    body: JSON.stringify({ estado: nuevoEstado })
-                })
-                .then(res => {
-                    if (!res.ok) throw new Error("Error al actualizar estado");
-                    return res.json();
-                })
-                .then(() => {
-                    // ✅ Reemplazar el contenido con nuevo estado
-                    span.innerHTML = `<i class="fas fa-circle icon-estado"></i> ${nuevoEstado}`;
-                    span.style.display = "inline-block";
-                    select.style.display = "none";
-                })
-                .catch(err => console.error("Error en actualización:", err));
-            }
-        });
+                    fetch(`/actualizar_estado_presentacion/${presentacionId}/`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": getCSRFToken()
+                        },
+                        body: JSON.stringify({ estado: nuevoEstado })
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error("Error al actualizar estado");
+                        return res.json();
+                    })
+                    .then(() => {
+                        // ✅ Reemplazar el contenido con nuevo estado
+                        span.innerHTML = `<i class="fas fa-circle icon-estado"></i> ${nuevoEstado}`;
+                        span.style.display = "inline-block";
+                        select.style.display = "none";
+                    })
+                    .catch(err => console.error("Error en actualización:", err));
+                }
+            });
+        } else {
+            // Si no es Camara, no hacer nada al click
+            span.style.cursor = "default";
+        }
     });
 
     function getCSRFToken() {

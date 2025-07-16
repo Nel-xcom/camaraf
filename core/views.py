@@ -312,28 +312,27 @@ def get_presentaciones(request):
     month = request.GET.get("month")
 
     if not year or not month:
-        return JsonResponse([], safe=False)  # Si no se reciben parámetros, devolver lista vacía
+        return JsonResponse([], safe=False)
 
     try:
         year = int(year)
         month = int(month)
     except ValueError:
-        return JsonResponse([], safe=False)  # Evitar errores si los parámetros son inválidos
+        return JsonResponse([], safe=False)
 
+    # Buscar todas las presentaciones del mes y año seleccionados, sin filtrar por farmacia
     presentaciones = Presentacion.objects.filter(
-        usuario__farmacia=request.user.farmacia,
         fecha__year=year,
         fecha__month=month
     ).order_by('fecha')
 
     data = [
         {
-            "fecha": p.fecha.strftime('%Y-%m-%d'),
-            "obra_social": p.obra_social
+            'fecha': p.fecha.strftime('%Y-%m-%d'),
+            'obra_social': p.obra_social
         }
         for p in presentaciones
     ]
-
     return JsonResponse(data, safe=False)
 
 @login_required
@@ -2018,7 +2017,10 @@ def camara_required(view_func):
 @login_required
 @camara_required
 def calendario(request):
-    # ... código existente ...
+    
+    #Agregar logica del calendario
+    presentaciones = Presentacion.objects.all()
+
     return render(request, 'calendario.html', {"presentaciones": presentaciones})
 
 @login_required

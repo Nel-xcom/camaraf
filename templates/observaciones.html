@@ -1,4 +1,5 @@
 {% load static %}
+{% load user_groups %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +10,7 @@
     <link rel="stylesheet" href="{% static 'css/observaciones.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body>
+<body{% if request.user|has_group:'Camara' %} data-user-camara="true"{% else %} data-user-camara="false"{% endif %}>
     {% include 'header.html' %}
 
     <div class="container">
@@ -57,12 +58,16 @@
                     <td>{{ presentacion.periodo }}</td>
                     <td>{{ presentacion.obra_social }}</td>
                     <td class="estado editable-estado" data-id="{{ presentacion.id }}">
+                        {% if request.user|has_group:'Camara' %}
                         <span class="estado-label"><i class="fas fa-circle icon-estado"></i> {{ presentacion.estado }}</span>
                         <select class="estado-select" style="display: none;">
                             {% for valor, display in presentacion.ESTADOS %}
                                 <option value="{{ valor }}" {% if valor == presentacion.estado %}selected{% endif %}>{{ display }}</option>
                             {% endfor %}
                         </select>
+                        {% else %}
+                        <span class="estado-label"><i class="fas fa-circle icon-estado"></i> {{ presentacion.estado }}</span>
+                        {% endif %}
                     </td>
 
 

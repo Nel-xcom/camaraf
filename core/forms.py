@@ -40,32 +40,40 @@ class CustomPasswordResetForm(PasswordResetForm):
     }))
 
 class CargaDatosForm(forms.ModelForm):
+    periodo_desde = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
+    periodo_hasta = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
     class Meta:
         model = CargaDatos
         fields = '__all__'
 
 class CargaDatosFormOSDIPP(forms.ModelForm):
+    periodo_desde = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
+    periodo_hasta = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
     class Meta:
         model = CargaDatos
         fields = [
-            'numero_presentacion', 'periodo', 'cantidad_lotes', 'cantidad_recetas', 'importe_100', 'importe_a_cargo'
+            'numero_presentacion', 'periodo_desde', 'periodo_hasta', 'cantidad_lotes', 'cantidad_recetas', 'importe_100', 'importe_a_cargo'
         ]
 
 class CargaDatosFormPAMI(forms.ModelForm):
+    periodo_desde = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
+    periodo_hasta = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
     class Meta:
         model = CargaDatos
         fields = [
-            'numero_presentacion', 'periodo', 'cantidad_lotes', 'cantidad_recetas', 'total_pvp', 'total_pvp_pami', 'importe_bruto_convenio'
+            'numero_presentacion', 'periodo_desde', 'periodo_hasta', 'cantidad_lotes', 'cantidad_recetas', 'total_pvp', 'total_pvp_pami', 'importe_bruto_convenio'
         ]
         labels = {
             'numero_presentacion': 'Número de carátula'
         }
 
 class CargaDatosFormAvalian(forms.ModelForm):
+    periodo_desde = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
+    periodo_hasta = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
     class Meta:
         model = CargaDatos
         fields = [
-            'periodo', 'cantidad_recetas', 'importe_100', 'importe_a_cargo'
+            'periodo_desde', 'periodo_hasta', 'cantidad_recetas', 'importe_100', 'importe_a_cargo'
         ]
 
 class LiquidacionGalenoForm(forms.Form):

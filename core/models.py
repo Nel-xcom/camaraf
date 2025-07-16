@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
 from django.utils import timezone
+from datetime import date
 
 class Farmacia(models.Model):
     codigo_farmacia = models.CharField(max_length=20, help_text="Código de la farmacia", default="F000")
@@ -50,6 +51,7 @@ class CargaDatos(models.Model):
     OBRAS_SOCIALES = [
         ('OSDIPP', 'OSDIPP'),
         ('SWISS_MEDICAL', 'Swiss Medical'),
+        ('SWISS_MEDICAL_ART', 'Swiss Medical ART'),
         ('GALENO', 'Galeno'),
         ('Ospilampil', 'OspilAmpil'),
         ('Osfatlyf', 'Osfatlyf'),
@@ -65,7 +67,10 @@ class CargaDatos(models.Model):
         ('experta_ART', 'Experta ART'),
         ('Galeno_ART', 'Galeno ART'),
         ('LaSegunda_ART', 'La Segunda ART'),
-        ('Prevencion_ART', 'Prevencion ART')
+        ('Prevencion_ART', 'Prevencion ART'),
+        ('Medicar_Work_ART', 'Medicar Work ART'),
+        ('MEOPP_ART', 'MEOPP ART'),
+        ('Policia_Federal', 'Policia Federal'),
     ]
 
     ESTADOS = [
@@ -77,7 +82,8 @@ class CargaDatos(models.Model):
 
     farmacia = models.ForeignKey(Farmacia, on_delete=models.CASCADE)
     obra_social = models.CharField(max_length=50, choices=OBRAS_SOCIALES, blank=False)
-    periodo = models.DateField(max_length=50, blank=False, default="none")
+    periodo_desde = models.DateField(blank=False, help_text="Periodo desde", default=date.today)
+    periodo_hasta = models.DateField(blank=False, help_text="Periodo hasta", default=date.today)
     numero_presentacion = models.CharField(max_length=50, null=True, blank=False)
     estado = models.CharField(max_length=100, choices=ESTADOS, default='Enviada', blank=False)
     cantidad_lotes = models.IntegerField(null=True, blank=False)
@@ -92,7 +98,7 @@ class CargaDatos(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=False)
 
     def __str__(self):
-        return f"{self.obra_social} - {self.periodo}"
+        return f"{self.obra_social} - {self.periodo_desde} al {self.periodo_hasta}"
 
 
 class Presentacion(models.Model):
@@ -171,6 +177,8 @@ class LiquidacionPAMI(models.Model):
     creditos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00, help_text="Créditos OS")
     inst_pago_drogueria = models.DecimalField(max_digits=15, decimal_places=2, default=0.00, help_text="Inst. Pago Droguería")
     recuperacion_gastos = models.DecimalField(max_digits=15, decimal_places=2, default=0.00, help_text="Recupero Gastos")
+    #Cantidad de recetas
+    #Cantidad de lotes
 
     user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='liquidaciones_pami')
 

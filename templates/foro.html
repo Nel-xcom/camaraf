@@ -90,7 +90,7 @@
                             </div>
                             
                             <div class="publication-content">
-                                <p class="publication-text">{{ publicacion.descripcion }}</p>
+                                <p class="publication-text">{{ publicacion.descripcion|linebreaksbr }}</p>
                                 
                                 {% if publicacion.imagen or publicacion.archivo %}
                                 <div class="publication-attachments">

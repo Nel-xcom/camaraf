@@ -89,17 +89,29 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function marcarDiasConPresentaciones(presentaciones) {
+        // Depuración: mostrar en consola todas las presentaciones recibidas
+        console.log('Presentaciones recibidas para marcar en calendario:', presentaciones);
         // Limpiar TODOS los tags existentes primero
         document.querySelectorAll('.evento').forEach(tag => tag.remove());
         
-        presentaciones.forEach(presentacion => {
-            const diaElemento = document.querySelector(`.day[data-date="${presentacion.fecha}"]`);
+        // Agrupar presentaciones por fecha para mostrar todas en el mismo día
+        const presentacionesPorFecha = {};
+        presentaciones.forEach(p => {
+            if (!presentacionesPorFecha[p.fecha]) {
+                presentacionesPorFecha[p.fecha] = [];
+            }
+            presentacionesPorFecha[p.fecha].push(p);
+        });
 
+        Object.entries(presentacionesPorFecha).forEach(([fecha, presentacionesDelDia]) => {
+            const diaElemento = document.querySelector(`.day[data-date="${fecha}"]`);
             if (diaElemento) {
-                const etiqueta = document.createElement("div");
-                etiqueta.className = "evento";
-                etiqueta.textContent = presentacion.obra_social;
-                diaElemento.appendChild(etiqueta);
+                presentacionesDelDia.forEach(p => {
+                    const etiqueta = document.createElement("div");
+                    etiqueta.className = "evento";
+                    etiqueta.textContent = p.obra_social;
+                    diaElemento.appendChild(etiqueta);
+                });
             }
         });
     }
