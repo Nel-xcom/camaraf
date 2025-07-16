@@ -197,9 +197,24 @@ def actualizar_estado_presentacion(request, id):
         nuevo_estado = data.get("estado")
 
         try:
-            presentacion = CargaDatos.objects.get(id=id, farmacia=request.user.farmacia)
+            # Permitir que Camara o superuser edite cualquier presentación
+            if request.user.is_superuser or request.user.groups.filter(name='Camara').exists():
+                presentacion = CargaDatos.objects.get(id=id)
+            else:
+                presentacion = CargaDatos.objects.get(id=id, farmacia=request.user.farmacia)
             presentacion.estado = nuevo_estado
             presentacion.save()
+
+            # Notificar a la farmacia (usuario) que subió la presentación
+            usuario_farmacia = presentacion.farmacia.user
+            if usuario_farmacia:
+                from .models import Notification
+                Notification.objects.create(
+                    usuario=usuario_farmacia,
+                    mensaje=f"La presentación {presentacion.numero_presentacion} ha cambiado a estado {nuevo_estado}",
+                    link="/observaciones/",
+                    tipo="foro"
+                )
             return JsonResponse({"status": "ok"})
         except CargaDatos.DoesNotExist:
             return JsonResponse({"error": "Presentación no encontrada"}, status=404)
@@ -418,20 +433,10 @@ def resumen_cobro(request):
     chart_data = []
 
     for p in presentaciones:
-        # Manejo seguro del periodo (DateField o CharField)
-        if hasattr(p.periodo, 'strftime'):  # Si es DateField
-            periodo_str = p.periodo.strftime("%Y-%m") if p.periodo else ""
-            year = p.periodo.year if p.periodo else None
-            month = p.periodo.month if p.periodo else None
-        else:  # Si es CharField
-            periodo_str = p.periodo.strip() if p.periodo else ""
-            # Extraer año y mes del string (formato esperado: YYYY-MM o similar)
-            if len(periodo_str) >= 7 and periodo_str[:4].isdigit() and periodo_str[5:7].isdigit():
-                year = int(periodo_str[:4])
-                month = int(periodo_str[5:7])
-            else:
-                year = None
-                month = None
+        # Usar periodo_desde y periodo_hasta en vez de 'periodo'
+        periodo_str = f"{p.periodo_desde.strftime('%Y-%m-%d')} a {p.periodo_hasta.strftime('%Y-%m-%d')}"
+        year = p.periodo_desde.year if p.periodo_desde else None
+        month = p.periodo_desde.month if p.periodo_desde else None
 
         liquidacion = None
         importe_liquidado = 0
@@ -1804,9 +1809,9 @@ def descargar_video(request, video_id):
 @login_required
 def notificaciones_usuario(request):
     """
-    Devuelve las notificaciones no leídas y recientes del usuario autenticado.
+    Devuelve las notificaciones recientes del usuario autenticado, priorizando las no leídas.
     """
-    notificaciones = Notification.objects.filter(usuario=request.user).order_by('-fecha')[:20]
+    notificaciones = Notification.objects.filter(usuario=request.user).order_by('leido', '-fecha')[:20]
     data = [
         {
             'id': n.id,

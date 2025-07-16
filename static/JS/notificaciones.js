@@ -23,10 +23,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>`;
                 });
                 list.innerHTML = html || '<div style="padding:24px;text-align:center;color:#aaa;">Sin notificaciones</div>';
-                badge.style.display = unread > 0 ? '' : 'none';
+                console.log('[NOTIF] Cantidad no leídas:', unread, data.notificaciones);
+                if (unread > 0) {
+                    badge.style.display = '';
+                    badge.style.visibility = 'visible';
+                    badge.style.background = '#e0245e';
+                    badge.style.border = '2px solid #fff'; // Borde de depuración
+                } else {
+                    badge.style.display = 'none';
+                }
                 badge.textContent = unread;
             });
     }
+
+    // Forzar recarga del badge al cargar la página
+    fetchNotificaciones();
 
     bell.addEventListener('click', function(e) {
         e.stopPropagation();
