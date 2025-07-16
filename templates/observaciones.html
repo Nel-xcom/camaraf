@@ -43,7 +43,8 @@
                     <th>Grupo</th>
                     <th>Usuario</th>
                     <th>Número de Presentación</th>
-                    <th>Periodo</th>
+                    <th>Periodo desde</th>
+                    <th>Hasta</th>
                     <th>Obra Social</th>
                     <th>Estado</th>
                     <th>Acciones</th>
@@ -53,9 +54,10 @@
                 {% for presentacion in presentaciones %}
                 <tr class="clickable-row" data-id="{{ presentacion.id }}">
                     <td>{{ presentacion.farmacia }}</td>
-                    <td>{{ usuario_asociado.username }}</td>
+                    <td>{{ presentacion.farmacia.user.username }}</td>
                     <td>{{ presentacion.numero_presentacion }}</td>
-                    <td>{{ presentacion.periodo }}</td>
+                    <td>{{ presentacion.periodo_desde }}</td>
+                    <td>{{ presentacion.periodo_hasta }}</td>
                     <td>{{ presentacion.obra_social }}</td>
                     <td class="estado editable-estado" data-id="{{ presentacion.id }}">
                         {% if request.user|has_group:'Camara' %}

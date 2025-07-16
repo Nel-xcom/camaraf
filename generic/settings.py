@@ -24,14 +24,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-@!d8$7j111@svy+m%lbd(k2r!bj+2x&#c26cudy$-08j=fpp=h'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 """
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 ALLOWED_HOSTS = ["3.92.180.141", "localhost", "127.0.0.1"]
 """
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["3.92.180.141", "localhost", "127.0.0.1"]
 
 AUTH_USER_MODEL = 'core.User' 
 
@@ -85,6 +85,14 @@ WSGI_APPLICATION = 'generic.wsgi.application'
 """
 DATABASES = {
     'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+"""
+
+DATABASES = {
+    'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'camara',
         'USER': 'camara_db',
@@ -93,15 +101,6 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-"""
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 
 #-- AUTH_USER_MODEL = 'core.CustomUser'
 

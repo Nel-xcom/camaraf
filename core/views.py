@@ -166,8 +166,11 @@ def presentacion_exitosa(request, carga_datos_id):
 
 
 def observaciones(request):
-    # Filtrar solo las presentaciones del usuario actual
-    presentaciones = CargaDatos.objects.filter(farmacia=request.user.farmacia)
+    # Determinar el queryset según el grupo del usuario
+    if request.user.is_superuser or request.user.groups.filter(name='Camara').exists():
+        presentaciones = CargaDatos.objects.all()
+    else:
+        presentaciones = CargaDatos.objects.filter(farmacia=request.user.farmacia)
 
     # Agregar el usuario relacionado con la farmacia
     usuario_asociado = request.user  # El usuario que está viendo la tabla
