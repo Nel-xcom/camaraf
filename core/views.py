@@ -75,6 +75,13 @@ from .utils import (
 )
 
 #----
+def camara_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if request.user.is_superuser or request.user.groups.filter(name='Camara').exists():
+            return view_func(request, *args, **kwargs)
+        return HttpResponseForbidden("No tienes permiso para acceder a esta sección.")
+    return _wrapped_view
 
 def register_farmacia(request):
     if request.method == 'POST':
@@ -2004,14 +2011,6 @@ def usuario_actualizar_json(request, user_id):
         tipo="foro"
     )
     return JsonResponse({'success': True})
-
-def camara_required(view_func):
-    @wraps(view_func)
-    def _wrapped_view(request, *args, **kwargs):
-        if request.user.is_superuser or request.user.groups.filter(name='Camara').exists():
-            return view_func(request, *args, **kwargs)
-        return HttpResponseForbidden("No tienes permiso para acceder a esta sección.")
-    return _wrapped_view
 
 # Ejemplo de aplicación del decorador a vistas del módulo Camara
 @login_required
