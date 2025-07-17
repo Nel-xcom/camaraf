@@ -78,29 +78,54 @@ document.addEventListener("DOMContentLoaded", function() {
     renderCalendar(currentDate);
 });
 
-document.addEventListener("DOMContentLoaded", function () {
+// --- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN ---
+let presentacionIdAEliminar = null;
+
+function showDeleteModal(presentacionId) {
+    presentacionIdAEliminar = presentacionId;
+    document.getElementById('delete-confirm-modal').style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    document.getElementById('delete-confirm-modal').style.display = 'none';
+    presentacionIdAEliminar = null;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll(".delete-btn").forEach(button => {
         button.addEventListener("click", function () {
             const presentacionId = this.getAttribute("data-id");
-            const row = this.closest("tr");  // Asegurar que se elimine la fila correcta
+            showDeleteModal(presentacionId);
+        });
+    });
 
-            if (confirm("¿Estás seguro de eliminar esta presentación?")) {
-                fetch(`/eliminar_presentacion/${presentacionId}/`, {
-                    method: "DELETE",
-                    headers: {
-                        "X-CSRFToken": getCSRFToken(),
-                        "Content-Type": "application/json"
-                    }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        row.remove();  // Eliminar la fila correctamente
-                    } else {
-                        alert("Error al eliminar la presentación.");
-                    }
-                })
-                .catch(error => console.error("Error:", error));
+    document.getElementById('close-delete-modal').addEventListener('click', closeDeleteModal);
+    document.getElementById('cancel-delete-btn').addEventListener('click', closeDeleteModal);
+    document.getElementById('delete-confirm-backdrop').addEventListener('click', closeDeleteModal);
+    document.getElementById('confirm-delete-btn').addEventListener('click', function () {
+        if (!presentacionIdAEliminar) return;
+        // Buscar el elemento de la fila a eliminar
+        const button = document.querySelector(`.delete-btn[data-id="${presentacionIdAEliminar}"]`);
+        const row = button ? button.closest('li') : null;
+        fetch(`/eliminar_presentacion_calendario/${presentacionIdAEliminar}/`, {
+            method: "DELETE",
+            headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "Content-Type": "application/json"
             }
+        })
+        .then(response => {
+            if (response.ok) {
+                if (row) row.remove();
+                showNotification('La eliminación se ha realizado correctamente', 'success', 2000);
+            } else {
+                showNotification('Error al eliminar la presentación.', 'error');
+            }
+            closeDeleteModal();
+        })
+        .catch(error => {
+            showNotification('Error de conexión', 'error');
+            closeDeleteModal();
         });
     });
 
@@ -109,3 +134,41 @@ document.addEventListener("DOMContentLoaded", function () {
         return token ? token.value : "";
     }
 });
+
+// --- NOTIFICACIÓN ESTILO FORO ---
+function showNotification(message, type = 'info', duration = 2000) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 1000;
+        max-width: 300px;
+        word-wrap: break-word;
+        margin-top: 50px;
+        animation: slideIn 0.3s ease-out;
+    `;
+    switch (type) {
+        case 'success':
+            notification.style.backgroundColor = '#00a651';
+            break;
+        case 'error':
+            notification.style.backgroundColor = '#e0245e';
+            break;
+        case 'warning':
+            notification.style.backgroundColor = '#856404';
+            break;
+        default:
+            notification.style.backgroundColor = '#1d9bf0';
+    }
+    document.body.appendChild(notification);
+    setTimeout(() => {
+        notification.remove();
+    }, duration);
+}

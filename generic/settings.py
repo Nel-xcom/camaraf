@@ -89,6 +89,16 @@ DATABASES = {
     }
 }
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'camara',
+        'USER': 'camara_db',
+        'PASSWORD': 'Batman1116',
+        'HOST': 'camara.cp686y6eaume.us-east-1.rds.amazonaws.com',
+        'PORT': '5432',
+    }
+}
 """
 DATABASES = {
     'default': {
@@ -100,6 +110,7 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
 
 
 #-- AUTH_USER_MODEL = 'core.CustomUser'

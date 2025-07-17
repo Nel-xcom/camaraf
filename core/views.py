@@ -2050,3 +2050,24 @@ def transferencias_tesorera(request):
 def lista_usuarios(request):
     usuarios = Farmacia.objects.all()
     return render(request, 'usuarios.html', {'usuarios': usuarios})
+
+@csrf_exempt
+@login_required
+def eliminar_presentacion_calendario(request, presentacion_id):
+    """
+    Elimina una presentación del calendario (modelo Presentacion).
+    Solo el usuario creador o un superusuario puede eliminarla.
+    """
+    if request.method == 'DELETE':
+        from .models import Presentacion
+        try:
+            presentacion = Presentacion.objects.get(id=presentacion_id)
+            if presentacion.usuario == request.user or request.user.is_superuser:
+                presentacion.delete()
+                return JsonResponse({'message': 'Presentación eliminada correctamente'}, status=200)
+            else:
+                return JsonResponse({'error': 'No tienes permisos para eliminar esta presentación.'}, status=403)
+        except Presentacion.DoesNotExist:
+            return JsonResponse({'error': 'Presentación no encontrada'}, status=404)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)

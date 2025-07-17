@@ -43,6 +43,7 @@ urlpatterns = [
     path('api/get_presentaciones/', views.get_presentaciones, name="get_presentaciones"),
     path('guardar_presentacion/', views.guardar_presentacion, name="guardar_presentacion"),
     path('eliminar_presentacion/<int:presentacion_id>/', views.eliminar_presentacion, name='eliminar_presentacion'),
+    path('eliminar_presentacion_calendario/<int:presentacion_id>/', views.eliminar_presentacion_calendario, name='eliminar_presentacion_calendario'),
 
     path('resumen-cobro/', views.resumen_cobro, name='resumen_cobro'),
     

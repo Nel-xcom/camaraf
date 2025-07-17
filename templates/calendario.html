@@ -122,5 +122,19 @@
 
     </div>
 
+    <!-- Modal de confirmación de eliminación -->
+    <div class="comment-modal" id="delete-confirm-modal" style="display:none;">
+        <div class="comment-modal-backdrop" id="delete-confirm-backdrop"></div>
+        <div class="comment-modal-content" style="max-width: 400px; padding: 32px 28px 24px 28px;">
+            <button class="comment-modal-close" id="close-delete-modal" title="Cerrar">&times;</button>
+            <h2 style="margin-bottom: 18px; font-size: 22px; color: #1a1a1a;">Confirmar eliminación</h2>
+            <p style="font-size: 16px; color: #0f1419; margin-bottom: 24px;">¿Estás seguro de que deseas eliminar esta presentación?</p>
+            <div style="display: flex; gap: 16px; justify-content: flex-end;">
+                <button id="cancel-delete-btn" style="background: #f0f0f0; color: #333; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 500; cursor: pointer;">Cancelar</button>
+                <button id="confirm-delete-btn" style="background: #e0245e; color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 500; cursor: pointer;">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
