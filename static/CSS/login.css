@@ -126,3 +126,41 @@ button:active {
         font-size: 1.5rem;
     }
 }
+
+/* Icono de mostrar/ocultar contraseña */
+.password-wrapper {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+.password-wrapper input[type="password"],
+.password-wrapper input[type="text"] {
+    padding-right: 44px !important;
+}
+.toggle-password {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    z-index: 2;
+}
+.toggle-password img {
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    filter: invert(62%) sepia(32%) saturate(453%) hue-rotate(170deg) brightness(97%) contrast(92%) drop-shadow(0 1px 2px var(--primary-color));
+    transition: filter 0.2s, transform 0.2s, opacity 0.2s;
+    opacity: 0.85;
+}
+.toggle-password img:hover, .toggle-password img:focus {
+    filter: invert(62%) sepia(32%) saturate(453%) hue-rotate(170deg) brightness(97%) contrast(92%) drop-shadow(0 2px 6px var(--primary-color));
+    transform: scale(1.08) rotate(-6deg);
+    opacity: 1;
+}
+.toggle-password img:active {
+    transform: scale(0.96) rotate(6deg);
+    opacity: 0.7;
+}

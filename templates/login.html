@@ -19,9 +19,21 @@
             <p>{{ error }}</p>
         </div>
         {% endif %}
-        <form method="post">
+        <form method="post" id="login-form">
             {% csrf_token %}
-            {{ form.as_p }}
+            <p>
+                <label for="id_username">Usuario</label>
+                <input type="text" name="username" maxlength="150" autofocus required id="id_username" class="form-control" placeholder="Usuario">
+            </p>
+            <p style="position:relative;">
+                <label for="id_password">Contraseña</label>
+                <span class="password-wrapper">
+                    <input type="password" name="password" required id="id_password" class="form-control" placeholder="Contraseña">
+                    <span class="toggle-password" id="togglePassword" tabindex="0" aria-label="Mostrar u ocultar contraseña">
+                        <img src="/static/images/eye-closed.png" alt="Mostrar contraseña" id="eyeIcon">
+                    </span>
+                </span>
+            </p>
             <button type="submit">Iniciar Sesión</button>
         </form>
         <div class="extra-links">
