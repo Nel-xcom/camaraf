@@ -28,7 +28,6 @@ DEBUG = False
 
 """
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-ALLOWED_HOSTS = ["3.92.180.141", "localhost", "127.0.0.1"]
 """
 ALLOWED_HOSTS = ["nelx.online", "www.nelx.online","3.92.180.141", "localhost", "127.0.0.1"]
 
@@ -88,28 +87,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'camara',
-        'USER': 'camara_db',
-        'PASSWORD': 'Batman1116',
-        'HOST': 'camara.cp686y6eaume.us-east-1.rds.amazonaws.com',
-        'PORT': '5432',
-    }
-}
 """
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'camara',
-        'USER': 'camara_db',
-        'PASSWORD': 'Batman1116',
-        'HOST': 'camara.cp686y6eaume.us-east-1.rds.amazonaws.com',
-        'PORT': '5432',
-    }
-}
 
 
 
